@@ -80,6 +80,10 @@
 <script>
     let step = 1, currentAnswer = null, attempts = 0;
     let totalScore = 0, correctScore = 0;
+    
+    // 유효한 단계만 배열로 고정 (5단계 누락 방지)
+    const validSteps = [1, 2, 3, 4, 6, 7, 8, 9, 10];
+    
     const r = (m) => Math.floor(Math.random() * m) + 1;
     const getGCD = (a, b) => b ? getGCD(b, a % b) : a;
 
@@ -90,18 +94,10 @@
         let temp = num;
         while (temp > 1) {
             let count = 0;
-            while (temp % d === 0) {
-                count++;
-                temp /= d;
-            }
-            if (count > 0) {
-                factors.push(count === 1 ? `${d}` : `${d}^{${count}}`);
-            }
+            while (temp % d === 0) { count++; temp /= d; }
+            if (count > 0) factors.push(count === 1 ? `${d}` : `${d}^{${count}}`);
             d++;
-            if (d * d > temp && temp > 1) {
-                factors.push(`${temp}`);
-                break;
-            }
+            if (d * d > temp && temp > 1) { factors.push(`${temp}`); break; }
         }
         return factors.join(" \\times ");
     }
@@ -136,15 +132,17 @@
     function generateQuestion(s) {
         let q = "", a = {}, title = "";
         switch(s) {
-            case 1:
+            case 1: {
                 title = "1단계: 순환소수로 나타내기";
                 const dens = [3, 6, 7, 9]; 
                 let d1 = dens[Math.floor(Math.random() * dens.length)];
                 let n1 = r(d1-1); while(getGCD(n1, d1) !== 1) n1 = r(d1-1);
                 let { nonCycle, cycle } = getRepeatingDecimalParts(n1, d1);
-                q = `\\frac{${n1}}{${d1}}`; a = { type: 'd1', nonCycle, cycle, display: "0." + nonCycle + (cycle.length>0?"("+cycle+")":"") };
+                q = `\\frac{${n1}}{${d1}}`; 
+                a = { type: 'd1', nonCycle, cycle, display: "0." + nonCycle + (cycle.length>0?"("+cycle+")":"") };
                 break;
-            case 2:
+            }
+            case 2: {
                 title = "2단계: 소수의 분류 판별";
                 let isRepeating = Math.random() > 0.5;
                 if(isRepeating) {
@@ -153,70 +151,105 @@
                 } else {
                     q = `0.${r(9)}${r(9)}${r(9)}`; a = { type:'c', ans: '유한소수' };
                 }
-                a.choices = ['유한소수', '순환소수']; break;
-            case 3:
+                a.choices = ['유한소수', '순환소수']; 
+                break;
+            }
+            case 3: {
                 title = "3단계: 기약분수의 소수 판별";
-                // 분모와 분자를 생성한 뒤 기약분수 원칙으로 판별
                 let n3 = r(20); 
                 let d3 = [6, 12, 14, 15, 18, 20, 25, 30][Math.floor(Math.random() * 8)];
-                
-                // 내부 판별 로직 (기약분수로 만든 후 분모 체크)
                 let common = getGCD(n3, d3);
                 let redD = d3 / common;
                 let tempD = redD;
                 while(tempD % 2 === 0) tempD /= 2;
                 while(tempD % 5 === 0) tempD /= 5;
                 let isFin = (tempD === 1);
-
-                // 소인수분해 형태로 표현
                 let n3Str = getPrimeFactorization(n3);
                 let d3Str = getPrimeFactorization(d3);
-                
                 q = `\\frac{${n3Str}}{${d3Str}}`; 
-                a = { type:'c', choices:['유한소수', '순환소수'], ans: isFin?'유한소수':'순환소수' }; break;
-           case 4:
-    title = "4단계: 순환소수를 분수로 나타내기";
-    // 유형 1: 순환마디가 2자리인 경우 (예: 0.1212...)
-    // 유형 2: 소수점 아래 순환하지 않는 부분이 있는 경우 (예: 0.1222...)
-    const qType = Math.random() > 0.5 ? 'typeA' : 'typeB';
-    
-    if (qType === 'typeA') {
-        // 유형 1: 순환마디 2자리 (0.ab...)
-        let n = r(89) + 10; // 10 ~ 98
-        while (n % 11 === 0) n = r(89) + 10; // 0.222... 처럼 한 자리 반복 방지
-        let nStr = String(n);
-        q = `0.\\dot{${nStr[0]}}\\dot{${nStr[1]}}`;
-        // 약분 전 분수: n/99
-        let common = getGCD(n, 99);
-        a = { type: 'f', n: (n / common).toString(), d: (99 / common).toString(), display: `${n / common}/${99 / common}` };
-    } else {
-        // 유형 2: 혼순환소수 (0.abc... 또는 0.ab...)
-        // 예: 0.1(2) -> 0.1222...
-        let nonC = r(8); // 순환하지 않는 소수점 첫째 자리 (1~8)
-        let cycle = r(9); // 순환하는 소수점 둘째 자리 (1~9)
-        while (nonC === cycle) cycle = r(9);
-        
-        q = `0.${nonC}\\dot{${cycle}}`;
-        // 분수 계산: (nonC*10 + cycle - nonC) / 90
-        let top = (nonC * 10 + cycle) - nonC;
-        let bottom = 90;
-        let common = getGCD(top, bottom);
-        a = { type: 'f', n: (top / common).toString(), d: (bottom / common).toString(), display: `${top / common}/${bottom / common}` };
-    }
-    break;        }
+                a = { type:'c', choices:['유한소수', '순환소수'], ans: isFin?'유한소수':'순환소수' }; 
+                break;
+            }
+            case 4: {
+                title = "4단계: 순환소수를 분수로 나타내기";
+                const qType = Math.random() > 0.5 ? 'typeA' : 'typeB';
+                if (qType === 'typeA') {
+                    // 순환마디 2자리 (예: 0.1212...)
+                    let n4 = Math.floor(Math.random() * 89) + 10; 
+                    while (n4 % 11 === 0) n4 = Math.floor(Math.random() * 89) + 10;
+                    let n4Str = String(n4);
+                    q = `0.\\dot{${n4Str[0]}}\\dot{${n4Str[1]}}`;
+                    let common4 = getGCD(n4, 99);
+                    a = { type: 'f', n: (n4 / common4).toString(), d: (99 / common4).toString(), display: `${n4 / common4}/${99 / common4}` };
+                } else {
+                    // 혼순환소수 (예: 0.1222...)
+                    let nonC = r(8); 
+                    let cycle = r(9); 
+                    while (nonC === cycle) cycle = r(9);
+                    q = `0.${nonC}\\dot{${cycle}}`;
+                    let top = (nonC * 10 + cycle) - nonC;
+                    let bottom = 90;
+                    let common4 = getGCD(top, bottom);
+                    a = { type: 'f', n: (top / common4).toString(), d: (bottom / common4).toString(), display: `${top / common4}/${bottom / common4}` };
+                }
+                break;
+            }
+            case 6: {
+                title = "6단계: 단항식과 단항식의 곱셈";
+                let c6_1 = r(5)+1, c6_2 = r(4)+1, e6_1 = r(2)+1, e6_2 = r(2)+1;
+                q = `${fmtTerm(c6_1, "x", e6_1)} \\times ${fmtTerm(c6_2, "x", e6_2)}`;
+                a = {type:'x', terms:[{c: c6_1*c6_2, b:'x', e: e6_1+e6_2}], display: fmtTerm(c6_1*c6_2, "x", e6_1+e6_2)}; 
+                break;
+            }
+            case 7: {
+                title = "7단계: 다항식의 덧셈";
+                let c7_1 = r(5), c7_2 = r(5), c7_3 = r(5), c7_4 = r(5);
+                q = `(${fmtTerm(c7_1, "x", 2)} + ${fmtTerm(c7_2, "x", 1)}) + (${fmtTerm(c7_3, "x", 2)} + ${fmtTerm(c7_4, "x", 1)})`;
+                a = {type:'x', terms:[{c: c7_1+c7_3, b:'x', e: 2}, {c: c7_2+c7_4, b:'x', e: 1}], display: `${c7_1+c7_3}x^2 + ${c7_2+c7_4}x`}; 
+                break;
+            }
+            case 8: {
+                title = "8단계: 다항식의 뺄셈";
+                let c8_1 = r(8)+2, c8_2 = r(8)+2, c8_3 = r(5)+1, c8_4 = r(5)+1;
+                q = `(${fmtTerm(c8_1, "x", 2)} + ${fmtTerm(c8_2, "x", 1)}) - (${fmtTerm(c8_3, "x", 2)} + ${fmtTerm(c8_4, "x", 1)})`;
+                a = {type:'x', terms:[{c: c8_1-c8_3, b:'x', e: 2}, {c: c8_2-c8_4, b:'x', e: 1}], display: `${c8_1-c8_3}x^2 + ${c8_2-c8_4}x`}; 
+                break;
+            }
+            case 9: {
+                title = "9단계: 단항식 × 다항식";
+                let c9_m = r(3)+1, c9_1 = r(4)+1, c9_2 = r(5)+1;
+                q = `${fmtTerm(c9_m, "x", 1)}(${fmtTerm(c9_1, "x", 1)} + ${c9_2})`;
+                a = {type:'x', terms:[{c: c9_m*c9_1, b:'x', e: 2}, {c: c9_m*c9_2, b:'x', e: 1}], display: `${c9_m*c9_1}x^2 + ${c9_m*c9_2}x`}; 
+                break;
+            }
+            case 10: {
+                title = "10단계: 다항식 ÷ 단항식";
+                let d10 = r(3)+1, a10_1 = r(4)+1, a10_2 = r(4)+1;
+                q = `(${fmtTerm(d10*a10_1, "x", 2)} + ${fmtTerm(d10*a10_2, "x", 1)}) \\div ${fmtTerm(d10, "x", 1)}`;
+                a = {type:'x', terms:[{c: a10_1, b:'x', e: 1}, {c: a10_2, b:'x', e: 0}], display: `${a10_1}x + ${a10_2}`}; 
+                break;
+            }
+            default:
+                title = "오류 발생"; q = "1+1"; a = {type:'c', choices:['2'], ans:'2'}; break;
+        }
         return { q: `$$ ${q} = ? $$`, a, title };
     }
 
     function nextQuestion(isNextStep) {
-        if(isNextStep) step++; 
-        if(step === 5) step = 6; 
-        if(step > 10) step = 1;
+        if(isNextStep) {
+            let currentIndex = validSteps.indexOf(step);
+            currentIndex++;
+            if(currentIndex >= validSteps.length) currentIndex = 0;
+            step = validSteps[currentIndex];
+        }
+        
         attempts = 0;
         const data = generateQuestion(step);
         currentAnswer = data.a;
         document.getElementById('step-title').innerText = data.title;
         document.getElementById('question').innerHTML = data.q;
         MathJax.typesetPromise();
+        
         ['area-step1','area-choice','area-frac','area-complex','result-btns'].forEach(id => document.getElementById(id).classList.add('hidden'));
         document.getElementById('submit-btn').classList.remove('hidden');
         document.getElementById('message').innerText = ""; document.getElementById('message').className = "";
@@ -246,9 +279,9 @@
                 if(t.e > 0) {
                     h += `<span class="base-text">${t.b}</span>`;
                     if(t.e > 1) h += `<input type="text" class="exp-input e-in">`;
-                    else h += `<input type="hidden" class="e-in" value="1">`;
+                    else h += `<input type="hidden" class="e-in" value="1">`; // 지수 1 생략
                 } else {
-                    h += `<input type="hidden" class="e-in" value="0">`;
+                    h += `<input type="hidden" class="e-in" value="0">`; // 지수 0 생략
                 }
                 h += `</div>`;
             });
@@ -281,7 +314,7 @@
         const msg = document.getElementById('message');
         if(isCorrect) {
             correctScore++; totalScore++;
-            msg.innerText = "⭐ 정답입니다!"; msg.className = "success";
+            msg.innerText = "⭐ 정답입니다! 아주 잘했어요."; msg.className = "success";
             showEndButtons();
         } else {
             attempts++;
