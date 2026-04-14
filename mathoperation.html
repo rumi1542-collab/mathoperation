@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>중학 수학 연산 마스터</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f0f4f8; display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; width: 100%; max-width: 600px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 8px solid #4a90e2; }
+        h1 { color: #2c3e50; text-align: center; font-size: 26px; margin-bottom: 25px; }
+        .info-panel { background: #f1f7ff; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #d0e3ff; color: #444; text-align: center; }
+        .question-box { font-size: 28px; margin: 40px 0; text-align: center; color: #333; min-height: 100px; display: flex; align-items: center; justify-content: center; }
+        
+        input[type="text"] { padding: 12px; font-size: 20px; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; text-align: center; transition: 0.3s; }
+        input[type="text"]:focus { border-color: #4a90e2; outline: none; background-color: #f9fcff; }
+
+        .input-wrapper { display: flex; gap: 10px; justify-content: center; align-items: center; min-height: 120px; }
+        #ans-single { width: 220px; }
+
+        .div-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .div-group label { font-size: 13px; color: #666; font-weight: bold; }
+        .short-input { width: 100px; }
+
+        .frac-container { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .frac-line { width: 70px; height: 2px; background-color: #333; }
+        .frac-input { width: 80px; }
+
+        button.main-btn { width: 100%; padding: 15px; margin-top: 20px; font-size: 18px; background: #4a90e2; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        button.main-btn:hover { background: #357abd; }
+        
+        #message { margin-top: 20px; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; min-height: 24px; font-size: 18px; }
+        .success { background-color: #e6ffed; color: #28a745; border: 1px solid #b7eb8f; }
+        .error { background-color: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+        .score-board { text-align: center; margin-top: 25px; color: #777; border-top: 1px dashed #ddd; padding-top: 15px; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔢 연산 무한 훈련 시스템</h1>
+
+    <div id="start-screen">
+        <p style="text-align:center;">학습자의 이름을 입력하고 시작하세요</p>
+        <input type="text" id="user-name" placeholder="이름 입력" style="width:100%">
+        <button class="main-btn" onclick="startGame()">학습 시작하기</button>
+    </div>
+
+    <div id="game-screen" class="hidden">
+        <div class="info-panel">
+            <strong>학습자:</strong> <span id="display-name"></span> | 
+            <strong>단계:</strong> <span id="current-step">1</span> / 18
+        </div>
+        
+        <div class="question-box" id="question"></div>
+        
+        <div class="input-wrapper">
+            <div id="area-single">
+                <input type="text" id="ans-single" placeholder="정답 입력" onkeypress="handleKey(event)">
+            </div>
+
+            <div id="area-div" class="hidden" style="display:flex; gap:15px;">
+                <div class="div-group"><label>몫</label><input type="text" id="ans-q" class="short-input" onkeypress="handleKey(event)"></div>
+                <div class="div-group"><label>나머지</label><input type="text" id="ans-r" class="short-input" onkeypress="handleKey(event)"></div>
+            </div>
+
+            <div id="area-frac" class="hidden">
+                <div class="frac-container">
+                    <input type="text" id="ans-num" class="frac-input" placeholder="분자" onkeypress="handleKey(event)">
+                    <div class="frac-line"></div>
+                    <input type="text" id="ans-den" class="frac-input" placeholder="분모" onkeypress="handleKey(event)">
+                </div>
+            </div>
+        </div>
+        
+        <button class="main-btn" onclick="checkAnswer()">정답 확인 (Enter)</button>
+        <div id="message"></div>
+        <div class="score-board">누적 성적: <span id="correct-count">0</span> / <span id="total-count">0</span> 맞힘</div>
+    </div>
+</div>
+
+<script>
+    let step = 1, totalCount = 0, correctCount = 0, currentAnswer = null, attempts = 0;
+
+    function startGame() {
+        const name = document.getElementById('user-name').value.trim();
+        if (!name) return alert("이름을 입력하세요!");
+        document.getElementById('display-name').innerText = name;
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        nextQuestion();
+    }
+
+    const getGCD = (a, b) => b ? getGCD(b, a % b) : a;
+    const getLCM = (a, b) => (a * b) / getGCD(a, b);
+
+    function generateQuestion(s) {
+        let q = "", a = {};
+        let n1, n2, d1, d2, common;
+
+        switch(s) {
+            case 1: 
+                n1 = Math.floor(Math.random() * 80) + 11; n2 = Math.floor(Math.random() * 80) + 11;
+                while((n1%10 + n2%10) < 10) n2 = Math.floor(Math.random() * 80) + 11;
+                q = `${n1} + ${n2}`; a = {type:'s', val: (n1+n2).toString()}; break;
+            case 2:
+                n1 = Math.floor(Math.random() * 70) + 25; n2 = Math.floor(Math.random() * (n1 - 10)) + 10;
+                while((n1%10 >= n2%10)) n1 = Math.floor(Math.random() * 70) + 25;
+                q = `${n1} - ${n2}`; a = {type:'s', val: (n1-n2).toString()}; break;
+            case 3:
+                n1 = Math.floor(Math.random() * 80) + 10; n2 = Math.floor(Math.random() * 80) + 10;
+                q = `${n1} \\times ${n2}`; a = {type:'s', val: (n1*n2).toString()}; break;
+            case 4:
+                n2 = Math.floor(Math.random() * 15) + 2; n1 = n2 * (Math.floor(Math.random() * 20) + 2);
+                q = `${n1} \\div ${n2}`; a = {type:'s', val: (n1/n2).toString()}; break;
+            case 5:
+                n2 = Math.floor(Math.random() * 8) + 3; n1 = Math.floor(Math.random() * 50) + 20;
+                if(n1 % n2 === 0) n1++;
+                q = `${n1} \\div ${n2}`; a = {type:'d', q: Math.floor(n1/n2).toString(), r: (n1%n2).toString()}; break;
+            case 6:
+                d1 = Math.floor(Math.random() * 8) + 5; n1 = Math.floor(Math.random() * 3) + 1; n2 = Math.floor(Math.random() * 3) + 1;
+                q = `\\frac{${n1}}{${d1}} + \\frac{${n2}}{${d1}}`; a = {type:'f', n: (n1+n2).toString(), d: d1.toString()}; break;
+            case 7:
+                d1 = Math.floor(Math.random() * 8) + 5; n1 = Math.floor(Math.random() * 4) + 5; n2 = Math.floor(Math.random() * 4) + 1;
+                q = `\\frac{${n1}}{${d1}} - \\frac{${n2}}{${d1}}`; a = {type:'f', n: (n1-n2).toString(), d: d1.toString()}; break;
+            case 8:
+                let w = Math.floor(Math.random() * 4) + 1; d1 = Math.floor(Math.random() * 7) + 2; n1 = Math.floor(Math.random() * (d1-1)) + 1;
+                q = `${w}\\frac{${n1}}{${d1}} \\rightarrow \\text{가분수}`; a = {type:'f', n: (w*d1+n1).toString(), d: d1.toString()}; break;
+            case 9:
+                let s1 = (Math.random() * 8 + 1).toFixed(1); let s2 = (Math.random() * 8 + 1).toFixed(1);
+                q = `${s1} + ${s2}`; a = {type:'s', val: (parseFloat(s1)+parseFloat(s2)).toFixed(1)}; break;
+            case 10:
+                let s3 = (Math.random() * 5 + 5).toFixed(1); let s4 = (Math.random() * 4 + 1).toFixed(1);
+                q = `${s3} - ${s4}`; a = {type:'s', val: (parseFloat(s3)-parseFloat(s4)).toFixed(1)}; break;
+            case 11:
+                common = Math.floor(Math.random() * 5) + 2; n1 = common * 3; n2 = common * 4;
+                q = `(${n1}, ${n2})\\text{의 최대공약수}`; a = {type:'s', val: getGCD(n1, n2).toString()}; break;
+            case 12:
+                n1 = Math.floor(Math.random() * 10) + 2; n2 = Math.floor(Math.random() * 10) + 2;
+                q = `(${n1}, ${n2})\\text{의 최소공배수}`; a = {type:'s', val: getLCM(n1, n2).toString()}; break;
+            case 13:
+                d1 = 2; d2 = 3; q = `\\frac{1}{${d1}} + \\frac{1}{${d2}}`; a = {type:'f', n: (d1+d2).toString(), d: (d1*d2).toString()}; break;
+            case 14:
+                d1 = 2; d2 = 5; q = `\\frac{1}{${d1}} - \\frac{1}{${d2}}`; a = {type:'f', n: (d2-d1).toString(), d: (d1*d2).toString()}; break;
+            case 15:
+                n1 = 1; d1 = 3; n2 = 2; d2 = 5; q = `\\frac{${n1}}{${d1}} \\times \\frac{${n2}}{${d2}}`; a = {type:'f', n: (n1*n2).toString(), d: (d1*d2).toString()}; break;
+            case 16:
+                n1 = 1; d1 = 2; n2 = 1; d2 = 3; q = `\\frac{${n1}}{${d1}} \\div \\frac{${n2}}{${d2}}`; a = {type:'f', n: (n1*d2).toString(), d: (d1*n2).toString()}; break;
+            case 17:
+                let s5 = (Math.random() * 0.8 + 0.1).toFixed(1); let m1 = Math.floor(Math.random() * 5) + 2;
+                q = `${s5} \\times ${m1}`; a = {type:'s', val: (parseFloat(s5)*m1).toFixed(1)}; break;
+            case 18:
+                let ansV = (Math.random() * 0.8 + 0.1).toFixed(1); let divV = Math.floor(Math.random() * 3) + 2;
+                let s6 = (parseFloat(ansV) * divV).toFixed(1);
+                q = `${s6} \\div ${divV}`; a = {type:'s', val: ansV.toString()}; break;
+        }
+        return { q: `$$ ${q} $$`, a };
+    }
+
+    function nextQuestion() {
+        attempts = 0;
+        const data = generateQuestion(step);
+        currentAnswer = data.a;
+        const qBox = document.getElementById('question');
+        qBox.innerHTML = data.q;
+        MathJax.typesetPromise([qBox]);
+
+        const areas = ['area-single', 'area-div', 'area-frac'];
+        areas.forEach(id => document.getElementById(id).classList.add('hidden'));
+        
+        if (currentAnswer.type === 's') {
+            document.getElementById('area-single').classList.remove('hidden');
+            document.getElementById('ans-single').value = ""; document.getElementById('ans-single').focus();
+        } else if (currentAnswer.type === 'd') {
+            document.getElementById('area-div').classList.remove('hidden');
+            document.getElementById('ans-q').value = ""; document.getElementById('ans-r').value = "";
+            document.getElementById('ans-q').focus();
+        } else if (currentAnswer.type === 'f') {
+            document.getElementById('area-frac').classList.remove('hidden');
+            document.getElementById('ans-num').value = ""; document.getElementById('ans-den').value = "";
+            document.getElementById('ans-num').focus();
+        }
+
+        document.getElementById('message').innerText = "";
+        document.getElementById('message').className = "";
+        document.getElementById('current-step').innerText = step;
+    }
+
+    function checkAnswer() {
+        let isCorrect = false;
+        if (currentAnswer.type === 's') {
+            if (document.getElementById('ans-single').value.trim() == currentAnswer.val) isCorrect = true;
+        } else if (currentAnswer.type === 'd') {
+            if (document.getElementById('ans-q').value.trim() == currentAnswer.q && 
+                document.getElementById('ans-r').value.trim() == currentAnswer.r) isCorrect = true;
+        } else if (currentAnswer.type === 'f') {
+            if (document.getElementById('ans-num').value.trim() == currentAnswer.n && 
+                document.getElementById('ans-den').value.trim() == currentAnswer.d) isCorrect = true;
+        }
+
+        const msg = document.getElementById('message');
+        if (isCorrect) {
+            msg.innerText = "⭐ 정답입니다! 아주 훌륭해요.";
+            msg.className = "success";
+            correctCount++; totalCount++;
+            setTimeout(() => { step = (step % 18) + 1; nextQuestion(); }, 1500);
+        } else {
+            attempts++;
+            if (attempts === 1) {
+                msg.innerText = "❗ 틀렸습니다. 다시 시도해 보세요!";
+                msg.className = "error";
+            } else {
+                let ansText = "";
+                if(currentAnswer.type === 's') ansText = currentAnswer.val;
+                else if(currentAnswer.type === 'd') ansText = `몫: ${currentAnswer.q}, 나머지: ${currentAnswer.r}`;
+                else if(currentAnswer.type === 'f') ansText = `${currentAnswer.n}/${currentAnswer.d}`;
+                
+                msg.innerText = `❌ 아쉽네요. 정답은 [ ${ansText} ] 입니다.`;
+                msg.className = "error";
+                totalCount++;
+                setTimeout(() => { step = (step % 18) + 1; nextQuestion(); }, 2500);
+            }
+        }
+        document.getElementById('correct-count').innerText = correctCount;
+        document.getElementById('total-count').innerText = totalCount;
+    }
+
+    function handleKey(e) { if (e.key === 'Enter') checkAnswer(); }
+</script>
+</body>
+</html>

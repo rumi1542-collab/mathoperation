@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>중2 수와 식 무한 훈련 - 마스터</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root { --primary: #2e7d32; --secondary: #81c784; --bg: #f1f8e9; }
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        .container { background: white; width: 100%; max-width: 800px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 8px solid var(--primary); }
+        h1 { color: var(--primary); text-align: center; font-size: 26px; margin-bottom: 25px; }
+        .info-panel { background: #e8f5e9; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: center; font-weight: bold; }
+        .question-box { font-size: 32px; margin: 30px 0; text-align: center; min-height: 120px; display: flex; align-items: center; justify-content: center; border: 1px solid #eee; border-radius: 15px; background: #fafafa; }
+        input[type="text"] { padding: 10px; font-size: 20px; border: 2px solid #ddd; border-radius: 8px; text-align: center; transition: 0.3s; }
+        input[type="text"]:focus { border-color: var(--primary); outline: none; background: #fafffa; }
+        .dot-container { display: inline-flex; flex-direction: column; align-items: center; margin: 0 2px; }
+        .dot { font-size: 22px; line-height: 10px; height: 12px; visibility: hidden; color: #d32f2f; font-weight: bold; }
+        .dot.active { visibility: visible; }
+        .coeff-input { font-size: 28px; width: 65px; font-weight: bold; }
+        .base-text { font-style: italic; width: auto; margin: 0 5px; color: #333; font-family: 'Times New Roman', serif; font-size: 28px; }
+        .exp-input { width: 35px; font-size: 16px; margin-bottom: 30px; height: 30px; }
+        .choice-btn { width: 100%; padding: 15px; margin: 8px 0; background: white; border: 2px solid #ddd; border-radius: 10px; cursor: pointer; font-size: 18px; transition: 0.2s; }
+        .choice-btn:hover { background: var(--bg); border-color: var(--primary); transform: translateY(-2px); }
+        .btn-group { display: flex; gap: 15px; margin-top: 25px; }
+        .btn-sub { flex: 1; padding: 15px; font-size: 17px; background: #81c784; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .btn-main { flex: 1; padding: 15px; font-size: 17px; background: var(--primary); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        #message { margin-top: 20px; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; min-height: 30px; font-size: 18px; }
+        .success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+        .score-box { font-size: 15px; color: #555; margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ccc; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚀 중2 수와 식 무한 학습 엔진</h1>
+    <div id="start-screen">
+        <input type="text" id="user-name" placeholder="학생 이름을 입력하세요" style="width:100%; margin-bottom:15px; padding:15px;">
+        <button class="btn-main" style="width:100%" onclick="startGame()">학습 시작</button>
+    </div>
+
+    <div id="game-screen" class="hidden">
+        <div class="info-panel"><span id="step-title"></span> | 학습자: <span id="display-name"></span></div>
+        <div class="question-box" id="question"></div>
+
+        <div id="input-areas">
+            <div id="area-step1" class="hidden" style="display:flex; justify-content:center; align-items:center;">
+                <span style="font-size:24px;">0.</span><div id="step1-inputs" style="display:flex;"></div>
+            </div>
+            <div id="area-choice" class="hidden"></div>
+            <div id="area-frac" class="hidden" style="text-align:center;">
+                <div style="display:inline-flex; flex-direction:column; align-items:center;">
+                    <input type="text" id="ans-num" style="width:80px;" placeholder="분자">
+                    <div style="width:90px; height:3px; background:#333; margin:8px 0;"></div>
+                    <input type="text" id="ans-den" style="width:80px;" placeholder="분모">
+                </div>
+            </div>
+            <div id="area-complex" class="hidden" style="text-align:center;">
+                <div id="complex-inputs" style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap;"></div>
+                <p style="font-size:13px; color:#666; font-style:italic; margin-top:15px;">* 결과는 내림차순으로 작성하세요.</p>
+            </div>
+        </div>
+
+        <div id="result-btns" class="hidden">
+            <div class="btn-group">
+                <button class="btn-sub" onclick="nextQuestion(false)">🔄 같은 유형 더 풀기</button>
+                <button class="btn-main" onclick="nextQuestion(true)">➡️ 다음 단계로 넘어가기</button>
+            </div>
+        </div>
+        <button class="btn-main" id="submit-btn" style="width:100%; margin-top:20px;" onclick="checkAnswer()">정답 확인 (Enter)</button>
+        <div id="message"></div>
+        <div class="score-box" style="text-align:center;">
+            누적 문제수: <span id="total-count">0</span> | 정답 개수: <span id="correct-count" style="color:#2e7d32; font-weight:bold;">0</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    let step = 1, currentAnswer = null, attempts = 0;
+    let totalScore = 0, correctScore = 0;
+    const r = (m) => Math.floor(Math.random() * m) + 1;
+    const getGCD = (a, b) => b ? getGCD(b, a % b) : a;
+
+    function getPrimeFactorization(num) {
+        if (num === 1) return "1";
+        let factors = [];
+        let d = 2;
+        let temp = num;
+        while (temp > 1) {
+            let count = 0;
+            while (temp % d === 0) {
+                count++;
+                temp /= d;
+            }
+            if (count > 0) {
+                factors.push(count === 1 ? `${d}` : `${d}^{${count}}`);
+            }
+            d++;
+            if (d * d > temp && temp > 1) {
+                factors.push(`${temp}`);
+                break;
+            }
+        }
+        return factors.join(" \\times ");
+    }
+
+    function startGame() {
+        const name = document.getElementById('user-name').value.trim();
+        if(!name) return alert("이름을 입력하세요!");
+        document.getElementById('display-name').innerText = name;
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        nextQuestion(false);
+    }
+
+    function getRepeatingDecimalParts(n, d) {
+        let remainders = [], digits = [], rem = n % d;
+        while (!remainders.includes(rem)) { remainders.push(rem); rem *= 10; digits.push(Math.floor(rem / d)); rem %= d; }
+        let startIdx = remainders.indexOf(rem);
+        return { nonCycle: digits.slice(0, startIdx).join(''), cycle: digits.slice(startIdx).join('') };
+    }
+
+    function fmtTerm(c, b, e) {
+        if (c === 0) return "";
+        let res = "";
+        if (e === 0) return String(c);
+        if (c === 1) res = "";
+        else if (c === -1) res = "-";
+        else res = String(c);
+        res += (e === 1 ? b : `${b}^{${e}}`);
+        return res;
+    }
+
+    function generateQuestion(s) {
+        let q = "", a = {}, title = "";
+        switch(s) {
+            case 1:
+                title = "1단계: 순환소수로 나타내기";
+                const dens = [3, 6, 7, 9]; 
+                let d1 = dens[Math.floor(Math.random() * dens.length)];
+                let n1 = r(d1-1); while(getGCD(n1, d1) !== 1) n1 = r(d1-1);
+                let { nonCycle, cycle } = getRepeatingDecimalParts(n1, d1);
+                q = `\\frac{${n1}}{${d1}}`; a = { type: 'd1', nonCycle, cycle, display: "0." + nonCycle + (cycle.length>0?"("+cycle+")":"") };
+                break;
+            case 2:
+                title = "2단계: 소수의 분류 판별";
+                let isRepeating = Math.random() > 0.5;
+                if(isRepeating) {
+                    let c = ["3", "12", "45", "142857"][Math.floor(Math.random()*4)];
+                    q = `0.${c}${c}${c}...`; a = { type:'c', ans: '순환소수' };
+                } else {
+                    q = `0.${r(9)}${r(9)}${r(9)}`; a = { type:'c', ans: '유한소수' };
+                }
+                a.choices = ['유한소수', '순환소수']; break;
+            case 3:
+                title = "3단계: 기약분수의 소수 판별";
+                // 분모와 분자를 생성한 뒤 기약분수 원칙으로 판별
+                let n3 = r(20); 
+                let d3 = [6, 12, 14, 15, 18, 20, 25, 30][Math.floor(Math.random() * 8)];
+                
+                // 내부 판별 로직 (기약분수로 만든 후 분모 체크)
+                let common = getGCD(n3, d3);
+                let redD = d3 / common;
+                let tempD = redD;
+                while(tempD % 2 === 0) tempD /= 2;
+                while(tempD % 5 === 0) tempD /= 5;
+                let isFin = (tempD === 1);
+
+                // 소인수분해 형태로 표현
+                let n3Str = getPrimeFactorization(n3);
+                let d3Str = getPrimeFactorization(d3);
+                
+                q = `\\frac{${n3Str}}{${d3Str}}`; 
+                a = { type:'c', choices:['유한소수', '순환소수'], ans: isFin?'유한소수':'순환소수' }; break;
+           case 4:
+    title = "4단계: 순환소수를 분수로 나타내기";
+    // 유형 1: 순환마디가 2자리인 경우 (예: 0.1212...)
+    // 유형 2: 소수점 아래 순환하지 않는 부분이 있는 경우 (예: 0.1222...)
+    const qType = Math.random() > 0.5 ? 'typeA' : 'typeB';
+    
+    if (qType === 'typeA') {
+        // 유형 1: 순환마디 2자리 (0.ab...)
+        let n = r(89) + 10; // 10 ~ 98
+        while (n % 11 === 0) n = r(89) + 10; // 0.222... 처럼 한 자리 반복 방지
+        let nStr = String(n);
+        q = `0.\\dot{${nStr[0]}}\\dot{${nStr[1]}}`;
+        // 약분 전 분수: n/99
+        let common = getGCD(n, 99);
+        a = { type: 'f', n: (n / common).toString(), d: (99 / common).toString(), display: `${n / common}/${99 / common}` };
+    } else {
+        // 유형 2: 혼순환소수 (0.abc... 또는 0.ab...)
+        // 예: 0.1(2) -> 0.1222...
+        let nonC = r(8); // 순환하지 않는 소수점 첫째 자리 (1~8)
+        let cycle = r(9); // 순환하는 소수점 둘째 자리 (1~9)
+        while (nonC === cycle) cycle = r(9);
+        
+        q = `0.${nonC}\\dot{${cycle}}`;
+        // 분수 계산: (nonC*10 + cycle - nonC) / 90
+        let top = (nonC * 10 + cycle) - nonC;
+        let bottom = 90;
+        let common = getGCD(top, bottom);
+        a = { type: 'f', n: (top / common).toString(), d: (bottom / common).toString(), display: `${top / common}/${bottom / common}` };
+    }
+    break;        }
+        return { q: `$$ ${q} = ? $$`, a, title };
+    }
+
+    function nextQuestion(isNextStep) {
+        if(isNextStep) step++; 
+        if(step === 5) step = 6; 
+        if(step > 10) step = 1;
+        attempts = 0;
+        const data = generateQuestion(step);
+        currentAnswer = data.a;
+        document.getElementById('step-title').innerText = data.title;
+        document.getElementById('question').innerHTML = data.q;
+        MathJax.typesetPromise();
+        ['area-step1','area-choice','area-frac','area-complex','result-btns'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        document.getElementById('submit-btn').classList.remove('hidden');
+        document.getElementById('message').innerText = ""; document.getElementById('message').className = "";
+
+        if(currentAnswer.type === 'd1') {
+            document.getElementById('area-step1').classList.remove('hidden');
+            let h = "";
+            for(let i=0; i<currentAnswer.nonCycle.length; i++) h += `<div class="dot-container"><div class="dot"></div><input type="text" class="non-in" style="width:45px"></div>`;
+            for(let i=0; i<currentAnswer.cycle.length; i++) {
+                let dotActive = (currentAnswer.cycle.length === 1) || (i === 0 || i === currentAnswer.cycle.length - 1) ? 'active' : '';
+                h += `<div class="dot-container"><div class="dot ${dotActive}">·</div><input type="text" class="cyc-in" style="width:45px"></div>`;
+            }
+            document.getElementById('step1-inputs').innerHTML = h;
+        } else if(currentAnswer.type === 'c') {
+            document.getElementById('area-choice').classList.remove('hidden');
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('area-choice').innerHTML = currentAnswer.choices.map(c => `<button class="choice-btn" onclick="handleChoice('${c}')">${c}</button>`).join('');
+        } else if(currentAnswer.type === 'f') {
+            document.getElementById('area-frac').classList.remove('hidden');
+            document.getElementById('ans-num').value = ""; document.getElementById('ans-den').value = "";
+        } else if(currentAnswer.type === 'x') {
+            document.getElementById('area-complex').classList.remove('hidden');
+            let h = "";
+            currentAnswer.terms.forEach((t, i) => {
+                if(i > 0) h += "<span style='font-size:24px; margin:0 10px;'>+</span>";
+                h += `<div style="display:inline-flex; align-items:center;"><input type="text" class="coeff-input c-in">`;
+                if(t.e > 0) {
+                    h += `<span class="base-text">${t.b}</span>`;
+                    if(t.e > 1) h += `<input type="text" class="exp-input e-in">`;
+                    else h += `<input type="hidden" class="e-in" value="1">`;
+                } else {
+                    h += `<input type="hidden" class="e-in" value="0">`;
+                }
+                h += `</div>`;
+            });
+            document.getElementById('complex-inputs').innerHTML = h;
+        }
+    }
+
+    function checkAnswer() {
+        let isCorrect = false;
+        if(currentAnswer.type === 'd1') {
+            let uN = Array.from(document.querySelectorAll('.non-in')).map(i => i.value.trim()).join('');
+            let uC = Array.from(document.querySelectorAll('.cyc-in')).map(i => i.value.trim()).join('');
+            if(uN === currentAnswer.nonCycle && uC === currentAnswer.cycle) isCorrect = true;
+        } else if(currentAnswer.type === 'f') {
+            if(document.getElementById('ans-num').value == currentAnswer.n && document.getElementById('ans-den').value == currentAnswer.d) isCorrect = true;
+        } else if(currentAnswer.type === 'x') {
+            let cIns = document.querySelectorAll('.c-in'), eIns = document.querySelectorAll('.e-in');
+            isCorrect = Array.from(currentAnswer.terms).every((t, i) => {
+                let uC = cIns[i].value.trim();
+                let uE = eIns[i].value;
+                return uC == t.c && uE == t.e;
+            });
+        }
+        processResult(isCorrect);
+    }
+
+    function handleChoice(v) { processResult(v === currentAnswer.ans); }
+
+    function processResult(isCorrect) {
+        const msg = document.getElementById('message');
+        if(isCorrect) {
+            correctScore++; totalScore++;
+            msg.innerText = "⭐ 정답입니다!"; msg.className = "success";
+            showEndButtons();
+        } else {
+            attempts++;
+            if(attempts === 1) {
+                msg.innerText = "❌ 틀렸습니다. 다시 한번 풀어보세요!"; msg.className = "error";
+            } else {
+                totalScore++;
+                msg.innerText = `💡 정답은 [ ${currentAnswer.display || currentAnswer.ans} ] 입니다.`;
+                msg.className = "error";
+                showEndButtons();
+            }
+        }
+        updateScoreBoard();
+    }
+
+    function updateScoreBoard() {
+        document.getElementById('total-count').innerText = totalScore;
+        document.getElementById('correct-count').innerText = correctScore;
+    }
+
+    function showEndButtons() {
+        document.getElementById('result-btns').classList.remove('hidden');
+        document.getElementById('submit-btn').classList.add('hidden');
+        document.getElementById('area-choice').classList.add('hidden');
+    }
+</script>
+</body>
+</html>
