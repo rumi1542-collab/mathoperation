@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1인용 만칼라 수 탐구 시뮬레이터</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            user-select: none;
+        }
+        h1 { color: #1e3a8a; margin-bottom: 5px; font-size: 28px;}
+        .description { color: #475569; margin-bottom: 25px; font-size: 15px; text-align: center; max-width: 850px; line-height: 1.6; }
+        
+        /* 컨트롤 패널 */
+        .control-panel {
+            background-color: #fff;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:hover { background-color: #1d4ed8; }
+        button:active { transform: scale(0.97); }
+        button:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+        
+        .undo-btn { background-color: #f59e0b; }
+        .undo-btn:hover { background-color: #d97706; }
+        .reset-btn { background-color: #ef4444; }
+        .reset-btn:hover { background-color: #dc2626; }
+
+        /* 동그란 바둑돌 컴포넌트 */
+        .stone-item {
+            width: 22px;
+            height: 22px;
+            background: radial-gradient(circle at 30% 30%, #475569, #0f172a);
+            border-radius: 50%;
+            box-shadow: 1px 2px 3px rgba(0,0,0,0.4);
+            display: inline-block;
+        }
+
+        /* 상태 알림 메시지 */
+        #message-area {
+            height: 40px;
+            font-size: 19px;
+            font-weight: bold;
+            color: #d97706;
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* 만칼라 보드판 */
+        .mancala-board {
+            display: flex;
+            background-color: #e5e7eb;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 일반 구덩이들 */
+        .pits-line { display: flex; gap: 15px; }
+        .pit-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 95px;
+        }
+        .pit {
+            width: 95px;
+            height: 140px;
+            background-color: #f1f5f9;
+            border: 2px solid #cbd5e1;
+            border-radius: 45px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 5px;
+            justify-content: center;
+            overflow-y: auto;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        
+        .pit.active-drop { background-color: #fef08a; border-color: #eab308; box-shadow: 0 0 15px rgba(234,179,8,0.7); }
+        
+        .pit-label { color: #1e3a8a; font-size: 13px; margin-bottom: 5px; font-weight: bold; }
+        .count-badge { color: #1e3a8a; font-size: 14px; margin-top: 6px; font-weight: bold; }
+
+        /* 수치 직접 입력 창 */
+        .pit-input {
+            width: 60px;
+            padding: 5px;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 8px;
+            border-radius: 6px;
+            border: 2px solid #94a3b8;
+            outline: none;
+        }
+        .pit-input:focus { border-color: #3b82f6; }
+
+        .move-btn {
+            background-color: #10b981;
+            padding: 6px 10px;
+            font-size: 13px;
+            margin-top: 8px;
+            width: 100%;
+        }
+        .move-btn:hover { background-color: #059669; }
+
+        /* 0번 집 */
+        .store-wrapper { display: flex; flex-direction: column; align-items: center; }
+        .store {
+            width: 120px;
+            height: 200px;
+            background-color: #fdf2f8;
+            border: 2px solid #f9a8d4;
+            border-radius: 15px;
+            padding: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 6px;
+            justify-content: center;
+            overflow-y: auto;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .store.active-drop { background-color: #fbcfe8; border-color: #db2777; box-shadow: 0 0 15px rgba(219,39,119,0.7); }
+    </style>
+</head>
+<body>
+
+    <h1>1인용 만칼라 수(Mancala Number) 탐구기</h1>
+    <div class="description">
+        각 구덩이 아래의 <strong>입력창에 숫자를 입력</strong>하면 바둑돌이 즉시 채워집니다. (숫자를 바꾸고 엔터 또는 빈 곳 클릭)<br>
+        [옮기기] 버튼을 누르면 돌들이 <strong>오른쪽(0번 집 방향)으로 1개씩 순차적으로 이동</strong>하며, 실수가 발생하면 <strong>[되돌리기]</strong>가 가능합니다.
+    </div>
+
+    <div class="control-panel">
+        <button id="undoBtn" class="undo-btn" onclick="undo()" disabled>↩ 1회 되돌리기</button>
+        <button class="reset-btn" onclick="resetAll()">전체 초기화</button>
+    </div>
+
+    <div id="message-area">가져갈 구덩이의 돌 개수를 아래 입력창에 설정해 보세요.</div>
+
+    <div class="mancala-board">
+        <div class="pits-line">
+            <div class="pit-wrapper">
+                <span class="pit-label">8번 구덩이</span>
+                <div class="pit" id="pit8"></div>
+                <span class="count-badge" id="badge8">0개</span>
+                <input type="number" class="pit-input" id="input8" min="0" max="50" value="0" onchange="setStonesViaInput(8)">
+                <button class="move-btn" id="btn8" onclick="distributeStones(8)">옮기기</button>
+            </div>
+            <div class="pit-wrapper">
+                <span class="pit-label">7번 구덩이</span>
+                <div class="pit" id="pit7"></div>
+                <span class="count-badge" id="badge7">0개</span>
+                <input type="number" class="pit-input" id="input7" min="0" max="50" value="0" onchange="setStonesViaInput(7)">
+                <button class="move-btn" id="btn7" onclick="distributeStones(7)">옮기기</button>
+            </div>
+            <div class="pit-wrapper">
+                <span class="pit-label">6번 구덩이</span>
+                <div class="pit" id="pit6"></div>
+                <span class="count-badge" id="badge6">0개</span>
+                <input type="number" class="pit-input" id="input6" min="0" max="50" value="0" onchange="setStonesViaInput(6)">
+                <button class="move-btn" id="btn6" onclick="distributeStones(6)">옮기기</button>
+            </div>
+            <div class="pit-wrapper">
+                <span class="pit-label">5번 구덩이</span>
+                <div class="pit" id="pit5"></div>
+                <span class="count-badge" id="badge5">0개</span>
+                <input type="number" class="pit-input" id="input5" min="0" max="50" value="0" onchange="setStonesViaInput(5)">
+                <button class="move-btn" id="btn5" onclick="distributeStones(5)">옮기기</button>
+            </div>
+            <div class="pit-wrapper">
+                <span class="pit-label">4번 구덩이</span>
+                <div class="pit" id="pit4"></div>
+                <span class="count-badge" id="badge4">0개</span>
+                <input type="number" class="pit-input" id="input4" min="0" max="50" value="0" onchange="setStonesViaInput(4)">
+                <button class="move-btn" id="btn4" onclick="distributeStones(4)">옮기기</button>
+            </div>
+            <div class="pit-wrapper">
+                <span class="pit-label">3번 구덩이</span>
+                <div class="pit" id="pit3"></div>
+                <span class="count-badge" id="badge3">0개</span>
+                <input type="number" class="pit-input" id="input3" min="0" max="50" value="0" onchange="setStonesViaInput(3)">
+                <button class="move-btn" id="btn3" onclick="distributeStones(3)">옮기기</button>
+            </div>
+            <div class="pit-wrapper">
+                <span class="pit-label">2번 구덩이</span>
+                <div class="pit" id="pit2"></div>
+                <span class="count-badge" id="badge2">0개</span>
+                <input type="number" class="pit-input" id="input2" min="0" max="50" value="0" onchange="setStonesViaInput(2)">
+                <button class="move-btn" id="btn2" onclick="distributeStones(2)">옮기기</button>
+            </div>
+            <div class="pit-wrapper">
+                <span class="pit-label">1번 구덩이</span>
+                <div class="pit" id="pit1"></div>
+                <span class="count-badge" id="badge1">0개</span>
+                <input type="number" class="pit-input" id="input1" min="0" max="50" value="0" onchange="setStonesViaInput(1)">
+                <button class="move-btn" id="btn1" onclick="distributeStones(1)">옮기기</button>
+            </div>
+        </div>
+
+        <div class="store-wrapper">
+            <span class="pit-label" style="color:#db2777; font-size: 14px;">0번 집 (Goal)</span>
+            <div class="store" id="pit0"></div>
+            <span class="count-badge" id="badge0" style="color:#db2777;">0개</span>
+        </div>
+    </div>
+
+    <script>
+        let historySnapshot = null;
+
+        function updateCounts() {
+            for (let i = 0; i <= 8; i++) {
+                const pit = document.getElementById(`pit${i}`);
+                const count = pit.querySelectorAll('.stone-item').length;
+                document.getElementById(`badge${i}`).innerText = count + "개";
+                if (i > 0) {
+                    document.getElementById(`input${i}`).value = count;
+                }
+            }
+        }
+
+        function saveStateToHistory() {
+            historySnapshot = [];
+            for (let i = 0; i <= 8; i++) {
+                const count = document.getElementById(`pit${i}`).querySelectorAll('.stone-item').length;
+                historySnapshot.push(count);
+            }
+            document.getElementById('undoBtn').disabled = false;
+        }
+
+        function createStonesInside(targetElement, count) {
+            targetElement.innerHTML = "";
+            for (let i = 0; i < count; i++) {
+                const stone = document.createElement('div');
+                stone.className = 'stone-item';
+                targetElement.appendChild(stone);
+            }
+        }
+
+        // 숫자 입력 시 즉시 돌 생성
+        function setStonesViaInput(pitIndex) {
+            saveStateToHistory();
+            const inputVal = parseInt(document.getElementById(`input${pitIndex}`).value) || 0;
+            const targetPit = document.getElementById(`pit${pitIndex}`);
+            
+            createStonesInside(targetPit, inputVal);
+            updateCounts();
+            document.getElementById('message-area').innerText = `${pitIndex}번 구덩이가 ${inputVal}개로 설정되었습니다.`;
+        }
+
+        function setButtonsDisabled(disabled) {
+            const buttons = document.querySelectorAll('.move-btn, .pit-input, .reset-btn');
+            buttons.forEach(btn => btn.disabled = disabled);
+            document.getElementById('undoBtn').disabled = disabled ? true : (historySnapshot === null);
+        }
+
+        // 순차적 배분 로직
+        async function distributeStones(startIndex) {
+            document.getElementById('message-area').innerText = "";
+            const currentPit = document.getElementById(`pit${startIndex}`);
+            const stones = currentPit.querySelectorAll('.stone-item');
+            let stoneCount = stones.length;
+
+            if (stoneCount === 0) {
+                document.getElementById('message-area').innerText = "선택한 구덩이에 돌이 없습니다!";
+                return;
+            }
+
+            saveStateToHistory();
+            setButtonsDisabled(true);
+
+            let targetIndex = startIndex;
+
+            for(let i = 0; i < stoneCount; i++) {
+                targetIndex--;
+
+                if (targetIndex < 0) {
+                    document.getElementById('message-area').innerText = "⚠️ 초과 에러: 배분할 돌이 0번 집의 범위를 넘어섰습니다!";
+                    setButtonsDisabled(false);
+                    return;
+                }
+
+                const targetPit = document.getElementById(`pit${targetIndex}`);
+                targetPit.classList.add('active-drop');
+                targetPit.appendChild(stones[i]);
+                updateCounts();
+
+                await new Promise(resolve => setTimeout(resolve, 400));
+                targetPit.classList.remove('active-drop');
+            }
+
+            if (targetIndex === 0) {
+                document.getElementById('message-area').innerText = "🎉 마지막 돌이 0번 집에 안착했습니다! [프리턴(Free Turn)] 한 번 더 실행하세요.";
+            } else {
+                document.getElementById('message-area').innerText = `${startIndex}번 구덩이 이동 완료. 마지막 돌 위치: ${targetIndex}번 구덩이`;
+            }
+
+            setButtonsDisabled(false);
+        }
+
+        // 되돌리기
+        function undo() {
+            if (!historySnapshot) return;
+            for (let i = 0; i <= 8; i++) {
+                const targetBox = document.getElementById(`pit${i}`);
+                createStonesInside(targetBox, historySnapshot[i]);
+            }
+            updateCounts();
+            historySnapshot = null;
+            document.getElementById('undoBtn').disabled = true;
+            document.getElementById('message-area').innerText = "↩ 직전 상태로 복구되었습니다.";
+        }
+
+        // 리셋
+        function resetAll() {
+            for(let i=0; i<=8; i++) {
+                document.getElementById(`pit${i}`).innerHTML = "";
+            }
+            document.getElementById('message-area').innerText = "모든 구덩이가 초기화되었습니다.";
+            historySnapshot = null;
+            updateCounts();
+            setButtonsDisabled(false);
+        }
+
+        updateCounts();
+    </script>
+</body>
+</html>
