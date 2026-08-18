@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>도형 닮음 판별기</title>
+  <title>중2 도형의 닮음 실습실</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -14,7 +14,7 @@
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
-      touch-action: none; /* 터치 제스처 브라우저 기본동작 방지 */
+      touch-action: none;
     }
 
     header {
@@ -112,8 +112,8 @@
 <body>
 
   <header>
-    <h1>온라인 도형 닮음 판별 실습실</h1>
-    <p>도형을 조작하여 닮음 조건을 확인하고 기하학적 성질을 탐구하세요.</p>
+    <h1>중2 도형의 닮음 실습실</h1>
+    <p>도형을 확대 축소해 합동인지 확인하여 닮음인 관계를 탐구하세요.</p>
   </header>
 
   <div class="main-container">
@@ -159,7 +159,6 @@
     let isPanning = false;
     let startPanX = 0, startPanY = 0;
 
-    // 핀치 줌(두 손가락 터치 확대/축소) 용 변수
     let lastTouchDist = 0;
 
     const SNAP_THRESHOLD = 8;
@@ -401,7 +400,6 @@
       refreshShapes();
     }
 
-    // 좌표 변환 공통 헬퍼 함수 (마우스 및 터치 겸용)
     function getCanvasWorldCoords(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
       return {
@@ -410,7 +408,6 @@
       };
     }
 
-    // 마우스 휠 스크롤 줌
     canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
       const rect = canvas.getBoundingClientRect();
@@ -428,7 +425,6 @@
       }
     }, { passive: false });
 
-    // 드래그/클릭 처리 로직
     function handleStart(clientX, clientY) {
       const { x: mx, y: my } = getCanvasWorldCoords(clientX, clientY);
 
@@ -532,18 +528,15 @@
       lastTouchDist = 0;
     }
 
-    // --- 마우스 이벤트 연결 ---
     canvas.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
     canvas.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
     window.addEventListener('mouseup', handleEnd);
 
-    // --- [신규] 터치 스크린(태블릿/스마트폰) 이벤트 연결 ---
     canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
       if (e.touches.length === 1) {
         handleStart(e.touches[0].clientX, e.touches[0].clientY);
       } else if (e.touches.length === 2) {
-        // 두 손가락 핀치 줌 시작 거리 계산
         lastTouchDist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
@@ -556,7 +549,6 @@
       if (e.touches.length === 1) {
         handleMove(e.touches[0].clientX, e.touches[0].clientY);
       } else if (e.touches.length === 2) {
-        // 두 손가락 핀치 줌 실행
         const currentDist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
