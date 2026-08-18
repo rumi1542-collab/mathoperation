@@ -11,13 +11,14 @@
             --bg: #f4f7f6;
         }
         body {
-            font-family: 'Malgun Gothic', sans-serif;
+            font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg);
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            padding: 20px 0;
         }
         .dashboard {
             background: white;
@@ -88,12 +89,20 @@
             <span>📐 중2 수와 식 무한 훈련</span>
             <span class="icon">➔</span>
         </a>
+
+        <!-- 새로 추가된 도형 닮음 판별기 링크 -->
+        <a href="content/similarity.html" class="menu-item">
+            <span>🔍 도형 닮음 판별 실습실</span>
+            <span class="icon">➔</span>
+        </a>
         
         <a href="content/mancala.html" class="menu-item">
             <span>🎮 1인용 만칼라 수 탐구기 시작하기</span>
             <span class="icon">➔</span>
         </a>
-    </div> <div class="footer">
+    </div>
+
+    <div class="footer">
         성실함이 최고의 수학 실력입니다. 파이팅!
     </div>
 </div>
