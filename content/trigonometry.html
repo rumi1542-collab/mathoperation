@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>예각의 삼각비 탐구 실험실</title>
+  <!-- MathJax 수식 렌더링 라이브러리 -->
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f4f6f8;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    header {
+      background-color: #ffffff;
+      padding: 14px 30px;
+      border-bottom: 1px solid #e1e4e8;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header .title-area h1 { font-size: 20px; color: #1a252c; font-weight: 700; }
+    header .title-area p { font-size: 13px; color: #64748b; margin-top: 2px; }
+
+    .btn-back {
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-back:hover { background-color: #f1f5f9; color: #1e293b; }
+
+    .main-container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 70px);
+      padding: 20px;
+      gap: 20px;
+      min-height: 0;
+    }
+
+    /* 좌측 컨트롤 패널 */
+    .sidebar {
+      width: 380px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .angle-input-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #f8fafc;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .angle-input-container label {
+      font-size: 15px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .angle-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .angle-input-wrapper input {
+      width: 65px;
+      padding: 5px 8px;
+      font-size: 16px;
+      font-family: 'Times New Roman', serif;
+      font-weight: bold;
+      text-align: center;
+      border: 1px solid #94a3b8;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .anim-box {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .anim-box-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .anim-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #ffffff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+    }
+    .anim-item span {
+      font-size: 13px;
+      color: #334155;
+      font-weight: 500;
+    }
+    .btn-anim {
+      background-color: #5c5be5;
+      color: #ffffff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.2s;
+    }
+    .btn-anim.active { background-color: #ef4444; }
+    .btn-anim:hover { opacity: 0.9; }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #5c5be5;
+      cursor: pointer;
+    }
+
+    .formula-text {
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .divider {
+      height: 1px;
+      background-color: #e2e8f0;
+      margin: 2px 0;
+    }
+
+    /* 우측 Canvas 영역 */
+    .viewport {
+      flex: 1;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+      min-width: 0;
+      min-height: 0;
+    }
+    canvas { width: 100%; height: 100%; display: block; cursor: grab; }
+    canvas:active { cursor: grabbing; }
+
+    .btn-reset {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 1px solid #cbd5e1;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      backdrop-filter: blur(4px);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-reset:hover {
+      background-color: #ffffff;
+      border-color: #94a3b8;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-area">
+      <h1>예각의 삼각비 탐구 실험실</h1>
+      <p>점 A, B와 변의 길이나 각도, 점 이름 텍스트를 직접 드래그하여 위치를 조정해 보세요.</p>
+    </div>
+    <button class="btn-back" onclick="window.history.back()">
+      <span>← 뒤로가기</span>
+    </button>
+  </header>
+
+  <div class="main-container">
+    <aside class="sidebar">
+      <div class="angle-input-container">
+        <label for="numAngle">각 <i>O</i> 의 크기 설정:</label>
+        <div class="angle-input-wrapper">
+          <input type="number" id="numAngle" min="0" max="90" value="25" onchange="onAngleInputChange()" onkeyup="onAngleInputChange()">
+          <span>°</span>
+        </div>
+      </div>
+
+      <div class="anim-box">
+        <div class="anim-box-title">각의 크기 자동 변화 탐구</div>
+        
+        <div class="anim-item">
+          <span>애니메이션 1: 빗변 = 1</span>
+          <button class="btn-anim" id="btnAnim1" onclick="toggleAnimation(1)">▶ 재생</button>
+        </div>
+
+        <div class="anim-item">
+          <span>애니메이션 2: 밑변 = 1</span>
+          <button class="btn-anim" id="btnAnim2" onclick="toggleAnimation(2)">▶ 재생</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="checkbox" id="chkSin" onchange="updateView()">
+          <span class="formula-text" id="labelSin">$$\sin O = \frac{a}{c} = $$</span>
+        </label>
+
+        <label class="checkbox-item">
+          <input type="checkbox" id="chkCos" onchange="updateView()">
+          <span class="formula-text" id="labelCos">$$\cos O = \frac{b}{c} = $$</span>
+        </label>
+
+        <label class="checkbox-item">
+          <input type="checkbox" id="chkTan" onchange="updateView()">
+          <span class="formula-text" id="labelTan">$$\tan O = \frac{a}{b} = $$</span>
+        </label>
+
+        <div class="divider"></div>
+
+        <label class="checkbox-item">
+          <input type="checkbox" id="chkSideLengths" onchange="updateView()">
+          <span>선분의 길이 <i>a</i>, <i>b</i>, <i>c</i> 보기</span>
+        </label>
+
+        <label class="checkbox-item">
+          <input type="checkbox" id="chkArc" onchange="updateView()">
+          <span>단위원 보기</span>
+        </label>
+
+        <label class="checkbox-item">
+          <input type="checkbox" id="chkPerpHyp" onchange="updateView()">
+          <span>빗변의 길이가 1일 때 수선의 길이 확인하기</span>
+        </label>
+
+        <label class="checkbox-item">
+          <input type="checkbox" id="chkPerpBase" onchange="updateView()">
+          <span>밑변의 길이가 1일 때 수선의 길이 확인하기</span>
+        </label>
+      </div>
+    </aside>
+
+    <main class="viewport" id="viewport">
+      <button class="btn-reset" onclick="resetAllState()">
+        <span>↺ 새로고침</span>
+      </button>
+      <canvas id="trigStage"></canvas>
+    </main>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('trigStage');
+    const ctx = canvas.getContext('2d');
+    const viewport = document.getElementById('viewport');
+
+    let baseScale = 180;
+    let zoomScale = 1.0;
+
+    let panX = 80;  
+    let panY = 360; 
+    let isPanning = false;
+    let startPanX = 0, startPanY = 0;
+
+    let lastTouchDist = 0;
+
+    let angleDegValue = 25;
+    let angleO = angleDegValue * (Math.PI / 180); 
+    let baseB = 2.0; 
+    let heightA = baseB * Math.tan(angleO); 
+    let hypotenuseC = Math.hypot(baseB, heightA); 
+
+    let activeAnimMode = 0;
+    let animTimer = null;
+    let animDirection = 1; 
+
+    let labelOffset = {
+      a: { x: 0, y: 0 },
+      b: { x: 0, y: 0 },
+      c: { x: 0, y: 0 },
+      angle: { x: 0, y: 0 },
+      A: { x: 0, y: 0 },
+      B: { x: 0, y: 0 },
+      D: { x: 0, y: 0 },
+      E: { x: 0, y: 0 },
+      G: { x: 0, y: 0 },
+      H: { x: 0, y: 0 }
+    };
+
+    let labelBounds = {};
+
+    let selectedTarget = null;
+    let dragStartPos = { x: 0, y: 0 };
+    let initialOffset = { x: 0, y: 0 };
+
+    function resizeCanvas() {
+      canvas.width = viewport.clientWidth;
+      canvas.height = viewport.clientHeight;
+      
+      if (canvas.width > 0) {
+        baseScale = Math.min(canvas.width / 2.8, canvas.height / 2.2);
+        panX = 70;
+        panY = canvas.height - 80;
+      }
+      draw();
+    }
+
+    const resizeObserver = new ResizeObserver(() => resizeCanvas());
+    resizeObserver.observe(viewport);
+
+    function toScreen(x, y) {
+      const currentScale = baseScale * zoomScale;
+      return {
+        x: panX + x * currentScale,
+        y: panY - y * currentScale
+      };
+    }
+
+    function toMath(sx, sy) {
+      const currentScale = baseScale * zoomScale;
+      return {
+        x: (sx - panX) / currentScale,
+        y: (panY - sy) / currentScale
+      };
+    }
+
+    function toggleAnimation(mode) {
+      if (activeAnimMode === mode) {
+        stopAnimation();
+      } else {
+        stopAnimation();
+        activeAnimMode = mode;
+        const btn = document.getElementById(`btnAnim${mode}`);
+        btn.classList.add('active');
+        btn.innerText = '❚❚ 정지';
+
+        document.getElementById('chkArc').checked = true;
+        if (mode === 1) {
+          document.getElementById('chkPerpHyp').checked = true;
+          hypotenuseC = 1.0;
+        } else if (mode === 2) {
+          document.getElementById('chkPerpBase').checked = true;
+          baseB = 1.0;
+        }
+
+        animTimer = setInterval(stepAnimation, 40);
+      }
+    }
+
+    function stopAnimation() {
+      if (animTimer) {
+        clearInterval(animTimer);
+        animTimer = null;
+      }
+      activeAnimMode = 0;
+      document.getElementById('btnAnim1').classList.remove('active');
+      document.getElementById('btnAnim1').innerText = '▶ 재생';
+      document.getElementById('btnAnim2').classList.remove('active');
+      document.getElementById('btnAnim2').innerText = '▶ 재생';
+    }
+
+    // 0도 ~ 90도 범위 전체 왕복 애니메이션
+    function stepAnimation() {
+      angleDegValue += animDirection;
+
+      if (angleDegValue >= 90) {
+        angleDegValue = 90;
+        animDirection = -1; // 90도 도달 시 감소 방향 전환
+      } else if (angleDegValue <= 0) {
+        angleDegValue = 0;
+        animDirection = 1;  // 0도 도달 시 증가 방향 전환
+      }
+
+      document.getElementById('numAngle').value = angleDegValue;
+      angleO = angleDegValue * (Math.PI / 180);
+
+      if (activeAnimMode === 1) {
+        hypotenuseC = 1.0;
+        baseB = hypotenuseC * Math.cos(angleO);
+        heightA = hypotenuseC * Math.sin(angleO);
+      } else if (activeAnimMode === 2) {
+        baseB = 1.0;
+        if (angleDegValue === 90) {
+          heightA = 10.0; // 90도 발산 방지 임시 상한
+        } else {
+          heightA = baseB * Math.tan(angleO);
+        }
+        hypotenuseC = Math.hypot(baseB, heightA);
+      }
+
+      updateView();
+    }
+
+    function resetAllState() {
+      stopAnimation();
+      
+      angleDegValue = 25;
+      document.getElementById('numAngle').value = angleDegValue;
+      angleO = angleDegValue * (Math.PI / 180);
+      
+      baseB = 2.0;
+      heightA = baseB * Math.tan(angleO);
+      hypotenuseC = Math.hypot(baseB, heightA);
+
+      labelOffset = {
+        a: { x: 0, y: 0 }, b: { x: 0, y: 0 }, c: { x: 0, y: 0 }, angle: { x: 0, y: 0 },
+        A: { x: 0, y: 0 }, B: { x: 0, y: 0 }, D: { x: 0, y: 0 }, E: { x: 0, y: 0 }, G: { x: 0, y: 0 }, H: { x: 0, y: 0 }
+      };
+
+      document.getElementById('chkSin').checked = false;
+      document.getElementById('chkCos').checked = false;
+      document.getElementById('chkTan').checked = false;
+      document.getElementById('chkSideLengths').checked = false;
+      document.getElementById('chkArc').checked = false;
+      document.getElementById('chkPerpHyp').checked = false;
+      document.getElementById('chkPerpBase').checked = false;
+
+      zoomScale = 1.0;
+      resizeCanvas();
+      updateView();
+    }
+
+    function onAngleInputChange() {
+      stopAnimation();
+      const input = document.getElementById('numAngle');
+      let val = parseInt(input.value, 10);
+      if (isNaN(val)) return;
+
+      val = Math.max(0, Math.min(90, val));
+      angleDegValue = val;
+      angleO = angleDegValue * (Math.PI / 180);
+
+      if (angleDegValue === 90) {
+        baseB = 0;
+        heightA = hypotenuseC > 0 ? hypotenuseC : 2.0;
+      } else {
+        if (baseB === 0) baseB = 2.0;
+        heightA = baseB * Math.tan(angleO);
+        if (angleDegValue === 0) heightA = 0;
+      }
+      hypotenuseC = Math.hypot(baseB, heightA);
+
+      updateView();
+    }
+
+    function updateView() {
+      updateLabels();
+      draw();
+    }
+
+    function updateLabels() {
+      const showSin = document.getElementById('chkSin').checked;
+      const showCos = document.getElementById('chkCos').checked;
+      const showTan = document.getElementById('chkTan').checked;
+
+      const aStr = heightA.toFixed(4);
+      const bStr = baseB.toFixed(4);
+      const cStr = hypotenuseC.toFixed(4);
+
+      const sinVal = (hypotenuseC > 0) ? (heightA / hypotenuseC).toFixed(4) : "0.0000";
+      const cosVal = (hypotenuseC > 0) ? (baseB / hypotenuseC).toFixed(4) : "0.0000";
+      
+      let tanVal = "0.0000";
+      if (angleDegValue >= 90 || Math.abs(baseB) < 0.0001) {
+        tanVal = "\\text{정의되지 않음}";
+      } else {
+        tanVal = (heightA / baseB).toFixed(4);
+      }
+
+      document.getElementById('labelSin').innerHTML = showSin ?
+        `$$\\sin O = \\frac{a}{c} = \\frac{${aStr}}{${cStr}} = ${sinVal}$$` :
+        `$$\\sin O = \\frac{a}{c} = $$`;
+
+      document.getElementById('labelCos').innerHTML = showCos ?
+        `$$\\cos O = \\frac{b}{c} = \\frac{${bStr}}{${cStr}} = ${cosVal}$$` :
+        `$$\\cos O = \\frac{b}{c} = $$`;
+
+      document.getElementById('labelTan').innerHTML = showTan ?
+        `$$\\tan O = \\frac{a}{b} = \\frac{${aStr}}{${bStr}} = ${tanVal}$$` :
+        `$$\\tan O = \\frac{a}{b} = $$`;
+
+      if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise([
+          document.getElementById('labelSin'),
+          document.getElementById('labelCos'),
+          document.getElementById('labelTan')
+        ]);
+      }
+    }
+
+    function drawGrid() {
+      const currentScale = baseScale * zoomScale;
+      const step = currentScale * 0.1; 
+      const mainStep = currentScale * 0.5; 
+
+      const ptO = toScreen(0, 0);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(ptO.x, 0, canvas.width - ptO.x, ptO.y);
+      ctx.clip();
+
+      ctx.strokeStyle = '#f1f5f9';
+      ctx.lineWidth = 1;
+
+      for (let x = ptO.x; x < canvas.width; x += step) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ptO.y); ctx.stroke();
+      }
+      for (let y = ptO.y; y > 0; y -= step) {
+        ctx.beginPath(); ctx.moveTo(ptO.x, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1.2;
+
+      for (let x = ptO.x; x < canvas.width; x += mainStep) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ptO.y); ctx.stroke();
+      }
+      for (let y = ptO.y; y > 0; y -= mainStep) {
+        ctx.beginPath(); ctx.moveTo(ptO.x, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawAxes() {
+      const ptO = toScreen(0, 0);
+
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2;
+      ctx.fillStyle = '#000000';
+
+      const xEnd = canvas.width - 25;
+      if (xEnd > ptO.x) {
+        ctx.beginPath();
+        ctx.moveTo(ptO.x, ptO.y);
+        ctx.lineTo(xEnd, ptO.y);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(xEnd, ptO.y - 5);
+        ctx.lineTo(xEnd + 8, ptO.y);
+        ctx.lineTo(xEnd, ptO.y + 5);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.font = 'italic 20pt "Times New Roman", serif';
+        ctx.fillText('x', xEnd + 12, ptO.y + 6);
+      }
+
+      const yEnd = 25;
+      if (ptO.y > yEnd) {
+        ctx.beginPath();
+        ctx.moveTo(ptO.x, ptO.y);
+        ctx.lineTo(ptO.x, yEnd);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(ptO.x - 5, yEnd);
+        ctx.lineTo(ptO.x, yEnd - 8);
+        ctx.lineTo(ptO.x + 5, yEnd);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.font = 'italic 20pt "Times New Roman", serif';
+        ctx.fillText('y', ptO.x - 6, yEnd - 12);
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawGrid();
+
+      const showSideLengths = document.getElementById('chkSideLengths').checked;
+      const showArc = document.getElementById('chkArc').checked;
+      const showPerpHyp = document.getElementById('chkPerpHyp').checked; 
+      const showPerpBase = document.getElementById('chkPerpBase').checked; 
+
+      const currentScale = baseScale * zoomScale;
+
+      const ptO = toScreen(0, 0);
+      const ptB = toScreen(baseB, 0);       
+      const ptA = toScreen(baseB, heightA); 
+
+      const hasD = hypotenuseC >= 1.0; 
+      const hasH = baseB >= 1.0; 
+
+      const xD = Math.cos(angleO), yD = Math.sin(angleO);
+      const ptD = toScreen(xD, yD);
+      const ptE = toScreen(xD, 0);
+
+      const xH = 1.0, yH = 0;
+      const ptH = toScreen(xH, yH);
+      const tanVal = Math.tan(angleO);
+      const ptG = toScreen(1.0, tanVal);
+
+      const isADCoincident = Math.abs(hypotenuseC - 1.0) < 0.01;
+      const isBECoincident = Math.abs(baseB - xD) < 0.01;
+      const isOBEqualsOne = Math.abs(baseB - 1.0) < 0.01;
+
+      // --- [1. 직각삼각형 OBA] ---
+      ctx.beginPath();
+      ctx.moveTo(ptO.x, ptO.y);
+      ctx.lineTo(ptB.x, ptB.y);
+      ctx.lineTo(ptA.x, ptA.y);
+      ctx.closePath();
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // 직각 표시
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(ptB.x - 14, ptB.y - 14, 14, 14);
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(ptB.x - 14, ptB.y - 14, 14, 14);
+
+      // 각 O 호
+      const obScreenLength = baseB * currentScale;
+      const angleArcRadius = Math.max(14, Math.min(45, obScreenLength * 0.35));
+
+      if (angleO > 0) {
+        ctx.beginPath();
+        ctx.arc(ptO.x, ptO.y, angleArcRadius, 0, -angleO, true);
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // 각도 표기 텍스트
+      const midAngle = angleO / 2;
+      const angleTextRadius = angleArcRadius + 18;
+      const defaultAngleX = ptO.x + angleTextRadius * Math.cos(midAngle);
+      const defaultAngleY = ptO.y - angleTextRadius * Math.sin(midAngle) + 6;
+
+      const angleX = defaultAngleX + labelOffset.angle.x;
+      const angleY = defaultAngleY + labelOffset.angle.y;
+
+      const angleText = `${angleDegValue}°`;
+
+      ctx.fillStyle = '#000000';
+      ctx.font = '20pt "Times New Roman", serif';
+      ctx.fillText(angleText, angleX, angleY);
+
+      const angleWidth = ctx.measureText(angleText).width;
+      labelBounds.angle = {
+        x: angleX - 4,
+        y: angleY - 24,
+        width: angleWidth + 8,
+        height: 30
+      };
+
+      // 변의 이름 및 길이 표기
+      if (showSideLengths) {
+        ctx.font = '20pt "Times New Roman", serif';
+
+        // 빗변 c
+        const midC_x = (ptO.x + ptA.x) / 2;
+        const midC_y = (ptO.y + ptA.y) / 2;
+        const normalX = -Math.sin(angleO);
+        const normalY = -Math.cos(angleO);
+        const offsetC = 22;
+        
+        const baseC_X = midC_x + normalX * offsetC - 35 + labelOffset.c.x;
+        const baseC_Y = midC_y + normalY * offsetC + labelOffset.c.y;
+        labelBounds.c = drawItalicVarText('c', ` = ${hypotenuseC.toFixed(4)}`, baseC_X, baseC_Y);
+
+        // 밑변 b
+        const midB_x = (ptO.x + ptB.x) / 2;
+        const baseB_X = midB_x - 30 + labelOffset.b.x;
+        const baseB_Y = ptO.y + 35 + labelOffset.b.y;
+        labelBounds.b = drawItalicVarText('b', ` = ${baseB.toFixed(4)}`, baseB_X, baseB_Y);
+
+        // 높이 a
+        const midA_y = (ptB.y + ptA.y) / 2;
+        const baseA_X = ptB.x + 18 + labelOffset.a.x;
+        const baseA_Y = midA_y + 6 + labelOffset.a.y;
+        labelBounds.a = drawItalicVarText('a', ` = ${heightA.toFixed(4)}`, baseA_X, baseA_Y);
+      } else {
+        labelBounds.a = null;
+        labelBounds.b = null;
+        labelBounds.c = null;
+      }
+
+      // --- [2. 제1사분면 x축, y축] ---
+      drawAxes();
+
+      // --- [3. 단위원 및 교점 D, H] ---
+      if (showArc) {
+        ctx.beginPath();
+        ctx.arc(ptO.x, ptO.y, currentScale, -Math.PI / 2, 0, false);
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        if (hasD) {
+          drawVertexHandle(ptD.x, ptD.y, '#000000', 'D', 'top', false, isADCoincident);
+        } else {
+          labelBounds.D = null;
+        }
+
+        if (hasH) {
+          drawVertexHandle(ptH.x, ptH.y, '#000000', 'H', 'bottom', false, isOBEqualsOne);
+        } else {
+          labelBounds.H = null;
+        }
+      } else {
+        labelBounds.D = null;
+        labelBounds.H = null;
+      }
+
+      // --- [4-1. 빗변의 길이가 1일 때 수선의 길이 확인] ---
+      if (showPerpHyp && showArc && hasD) {
+        ctx.beginPath();
+        ctx.moveTo(ptD.x, ptD.y);
+        ctx.lineTo(ptE.x, ptE.y);
+        ctx.strokeStyle = '#f97316';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        const ptD_Y = toScreen(0, yD);
+        ctx.beginPath();
+        ctx.moveTo(ptD.x, ptD.y);
+        ctx.lineTo(ptD_Y.x, ptD_Y.y);
+        ctx.strokeStyle = '#f97316';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#f97316';
+        ctx.font = '16pt "Times New Roman", serif';
+        ctx.fillText(xD.toFixed(4), ptE.x - 20, ptO.y + 24);
+        ctx.fillText(yD.toFixed(4), ptO.x - 70, ptD_Y.y + 5);
+
+        drawVertexHandle(ptE.x, ptE.y, '#000000', 'E', 'bottom', false, isBECoincident);
+      } else if (!showPerpBase) {
+        labelBounds.E = null;
+      }
+
+      // --- [4-2. 밑변의 길이가 1일 때 수선의 길이 확인] ---
+      if (showPerpBase && showArc && hasH) {
+        ctx.beginPath();
+        ctx.moveTo(ptH.x, ptH.y);
+        ctx.lineTo(ptG.x, ptG.y);
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(ptO.x, ptO.y);
+        ctx.lineTo(ptG.x, ptG.y);
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const ptG_Y = toScreen(0, tanVal);
+        ctx.beginPath();
+        ctx.moveTo(ptG.x, ptG.y);
+        ctx.lineTo(ptG_Y.x, ptG_Y.y);
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#10b981';
+        ctx.font = '16pt "Times New Roman", serif';
+        ctx.fillText('1.0000', ptH.x - 25, ptO.y + 24);
+        
+        if (angleDegValue < 90) {
+          ctx.fillText(tanVal.toFixed(4), ptO.x - 70, ptG_Y.y + 5);
+        }
+
+        drawVertexHandle(ptG.x, ptG.y, '#000000', 'G', 'right', false, isOBEqualsOne);
+      } else {
+        labelBounds.G = null;
+      }
+
+      // --- [5. 꼭짓점 핸들] ---
+      drawVertexHandle(ptO.x, ptO.y, '#000000', 'O', 'left', true); 
+      drawVertexHandle(ptB.x, ptB.y, '#ef4444', 'B', 'right');
+      drawVertexHandle(ptA.x, ptA.y, '#ef4444', 'A', 'top');
+    }
+
+    function drawItalicVarText(varName, restText, x, y) {
+      ctx.fillStyle = '#000000';
+      ctx.font = 'italic 20pt "Times New Roman", serif';
+      ctx.fillText(varName, x, y);
+
+      const varWidth = ctx.measureText(varName).width;
+
+      ctx.font = '20pt "Times New Roman", serif';
+      ctx.fillText(restText, x + varWidth, y);
+
+      const totalWidth = varWidth + ctx.measureText(restText).width;
+
+      return {
+        x: x - 5,
+        y: y - 24,
+        width: totalWidth + 10,
+        height: 30
+      };
+    }
+
+    function drawVertexHandle(x, y, color, label, pos, isFixed = false, hideLabel = false) {
+      ctx.beginPath();
+      ctx.arc(x, y, 7, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      if (hideLabel) {
+        labelBounds[label] = null;
+        return;
+      }
+
+      let defX = x - 28, defY = y + 26;
+      if (pos === 'right') { defX = x + 16; defY = y + 26; }
+      else if (pos === 'top') { defX = x - 6; defY = y - 18; }
+      else if (pos === 'bottom') { defX = x - 6; defY = y + 30; }
+
+      const lx = defX + (labelOffset[label] ? labelOffset[label].x : 0);
+      const ly = defY + (labelOffset[label] ? labelOffset[label].y : 0);
+
+      ctx.fillStyle = color;
+      ctx.font = '20pt "Times New Roman", serif';
+      ctx.fillText(label, lx, ly);
+
+      if (!isFixed) {
+        const lblWidth = ctx.measureText(label).width;
+        labelBounds[label] = {
+          x: lx - 4,
+          y: ly - 24,
+          width: lblWidth + 8,
+          height: 30
+        };
+      }
+    }
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+      const newScale = zoomScale * zoomFactor;
+
+      if (newScale >= 0.1 && newScale <= 10.0) {
+        panX = mouseX - (mouseX - panX) * zoomFactor;
+        panY = mouseY - (mouseY - panY) * zoomFactor;
+        zoomScale = newScale;
+        draw();
+      }
+    }, { passive: false });
+
+    function handleStart(clientX, clientY) {
+      stopAnimation();
+
+      const rect = canvas.getBoundingClientRect();
+      const sx = clientX - rect.left;
+      const sy = clientY - rect.top;
+
+      const ptA = toScreen(baseB, heightA);
+      const ptB = toScreen(baseB, 0);
+
+      if (Math.hypot(sx - ptA.x, sy - ptA.y) < 22) {
+        selectedTarget = 'A';
+        return;
+      }
+      if (Math.hypot(sx - ptB.x, sy - ptB.y) < 22) {
+        selectedTarget = 'B';
+        return;
+      }
+
+      const targetKeys = ['A', 'B', 'D', 'E', 'G', 'H', 'a', 'b', 'c', 'angle'];
+      for (const key of targetKeys) {
+        const b = labelBounds[key];
+        if (b && sx >= b.x && sx <= b.x + b.width && sy >= b.y && sy <= b.y + b.height) {
+          selectedTarget = `label_${key}`;
+          dragStartPos = { x: clientX, y: clientY };
+          if (!labelOffset[key]) labelOffset[key] = { x: 0, y: 0 };
+          initialOffset = { ...labelOffset[key] };
+          return;
+        }
+      }
+
+      isPanning = true;
+      startPanX = clientX - panX;
+      startPanY = clientY - panY;
+    }
+
+    function handleMove(clientX, clientY) {
+      if (isPanning) {
+        panX = clientX - startPanX;
+        panY = clientY - startPanY;
+        draw();
+        return;
+      }
+
+      if (!selectedTarget) return;
+
+      if (selectedTarget.startsWith('label_')) {
+        const key = selectedTarget.replace('label_', '');
+        const dx = clientX - dragStartPos.x;
+        const dy = clientY - dragStartPos.y;
+
+        if (!labelOffset[key]) labelOffset[key] = { x: 0, y: 0 };
+        labelOffset[key].x = initialOffset.x + dx;
+        labelOffset[key].y = initialOffset.y + dy;
+        draw();
+        return;
+      }
+
+      const rect = canvas.getBoundingClientRect();
+      const sx = clientX - rect.left;
+      const sy = clientY - rect.top;
+      const mathPt = toMath(sx, sy);
+
+      const SNAP_THRESHOLD = 0.05;
+
+      if (selectedTarget === 'A') {
+        let rawAngleRad = Math.atan2(mathPt.y, mathPt.x);
+        
+        let rawDeg = Math.round(rawAngleRad * (180 / Math.PI));
+        rawDeg = Math.max(0, Math.min(90, rawDeg));
+
+        angleDegValue = rawDeg;
+        angleO = angleDegValue * (Math.PI / 180);
+
+        document.getElementById('numAngle').value = angleDegValue;
+
+        let dist = Math.max(0.001, Math.hypot(mathPt.x, mathPt.y));
+        const nearestInt = Math.round(dist);
+
+        if (Math.abs(dist - nearestInt) < SNAP_THRESHOLD && nearestInt > 0) {
+          dist = nearestInt;
+        }
+
+        hypotenuseC = dist;
+        if (angleDegValue === 90) {
+          baseB = 0;
+          heightA = hypotenuseC;
+        } else {
+          baseB = hypotenuseC * Math.cos(angleO);
+          heightA = hypotenuseC * Math.sin(angleO);
+          if (angleDegValue === 0) heightA = 0;
+        }
+      } 
+      else if (selectedTarget === 'B') {
+        let rawB = Math.max(0.001, mathPt.x);
+        const nearestIntB = Math.round(rawB);
+
+        if (Math.abs(rawB - nearestIntB) < SNAP_THRESHOLD && nearestIntB > 0) {
+          rawB = nearestIntB;
+        }
+
+        baseB = rawB;
+        if (angleDegValue === 90) {
+          baseB = 0;
+        } else {
+          heightA = baseB * Math.tan(angleO);
+          if (angleDegValue === 0) heightA = 0;
+        }
+        hypotenuseC = Math.hypot(baseB, heightA);
+      }
+
+      updateLabels();
+      draw();
+    }
+
+    function handleEnd() {
+      selectedTarget = null;
+      isPanning = false;
+      lastTouchDist = 0;
+    }
+
+    canvas.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
+    canvas.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+    window.addEventListener('mouseup', handleEnd);
+
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        handleStart(e.touches[0].clientX, e.touches[0].clientY);
+      } else if (e.touches.length === 2) {
+        lastTouchDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1) {
+        e.preventDefault();
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      } else if (e.touches.length === 2) {
+        e.preventDefault();
+        const currentDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+
+        if (lastTouchDist > 0) {
+          const zoomFactor = currentDist / lastTouchDist;
+          const newScale = zoomScale * zoomFactor;
+
+          if (newScale >= 0.1 && newScale <= 10.0) {
+            const rect = canvas.getBoundingClientRect();
+            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+
+            panX = midX - (midX - panX) * zoomFactor;
+            panY = midY - (midY - panY) * zoomFactor;
+            zoomScale = newScale;
+            draw();
+          }
+        }
+        lastTouchDist = currentDist;
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', handleEnd);
+
+    resizeCanvas();
+    updateLabels();
+  </script>
+</body>
+</html>
