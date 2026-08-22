@@ -107,6 +107,30 @@
       transition: all 0.2s ease;
     }
     .btn-refresh:hover { background-color: #f8fafc; border-color: #94a3b8; }
+
+    /* 홈 버튼 스타일 */
+.btn-home {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.btn-home:hover {
+  background-color: #f1f5f9;
+  color: #1e293b;
+}
+
+    
   </style>
 </head>
 <body>
@@ -114,6 +138,10 @@
   <header>
     <h1>중2 도형의 닮음 실습실</h1>
     <p>도형을 확대 축소해 합동인지 확인하여 닮음인 관계를 탐구하세요.</p>
+    <!-- 홈 버튼 (GitHub Pages 절대 주소) -->
+<a href="https://rumi1542-collab.github.io/mathoperation/index.html" class="btn-home">
+  <span>🏠 홈</span>
+</a>
   </header>
 
   <div class="main-container">
