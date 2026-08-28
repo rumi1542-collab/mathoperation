@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>대수타일 수학 탐구 실습실</title>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f4f6f8;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    header {
+      background-color: #ffffff;
+      padding: 12px 20px;
+      border-bottom: 1px solid #e1e4e8;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header .title-area h1 { font-size: 18px; color: #1a252c; font-weight: 700; }
+    header .title-area p { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+    .btn-home {
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .btn-home:hover { background-color: #f1f5f9; color: #1e293b; }
+
+    .main-container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 60px);
+      padding: 16px;
+      gap: 16px;
+      min-height: 0;
+    }
+
+    .sidebar {
+      width: 360px;
+      max-height: 100%;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex-shrink: 0;
+      overflow-y: auto;
+      touch-action: pan-y;
+    }
+
+    .sidebar h2 { font-size: 16px; font-weight: 700; color: #1e293b; }
+
+    .grade-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .btn-grade {
+      padding: 8px 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      background-color: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .btn-grade.active {
+      background-color: #5c5be5;
+      color: #ffffff;
+      border-color: #5c5be5;
+    }
+
+    /* 실제 타일과 합동인 팔레트 스타일 */
+    .tile-palette-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      background: #f8fafc;
+      padding: 14px 10px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .tile-pair-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .tile-item {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 135px;
+    }
+
+    .btn-tile-shape {
+      border: 2px solid #ffffff;
+      cursor: pointer;
+      font-family: 'Pretendard', sans-serif;
+      font-weight: bold;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      user-select: none;
+    }
+    .btn-tile-shape:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.18);
+    }
+    .btn-tile-shape:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    /* 타일 실제 크기와 1:1 합동 (UNIT: 38px, X_LEN: 129px) */
+    .tile-x2 { width: 129px; height: 129px; font-size: 18px; background-color: #3b82f6; }
+    .tile-nx2 { width: 129px; height: 129px; font-size: 18px; background-color: #ef4444; }
+    .tile-x { width: 129px; height: 38px; font-size: 16px; background-color: #60a5fa; }
+    .tile-nx { width: 129px; height: 38px; font-size: 16px; background-color: #f87171; }
+    .tile-1 { width: 38px; height: 38px; font-size: 15px; background-color: #f59e0b; }
+    .tile-n1 { width: 38px; height: 38px; font-size: 15px; background-color: #9ca3af; }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #5c5be5;
+    }
+
+    .guide-box {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #334155;
+    }
+
+    .viewport {
+      flex: 1;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
+      min-width: 0;
+      min-height: 0;
+      padding: 2mm;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    canvas:active {
+      cursor: grabbing;
+    }
+
+    .btn-clear {
+      position: absolute;
+      top: calc(10px + 2mm);
+      right: calc(10px + 2mm);
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 1px solid #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    @media (max-width: 768px) {
+      body { overflow: auto; }
+      header .title-area p { display: none; }
+      .main-container {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 60px);
+        padding: 10px;
+        gap: 12px;
+      }
+      .viewport { order: 1; width: 100%; height: 45vh; min-height: 280px; flex: none; }
+      .sidebar { order: 2; width: 100%; max-height: none; overflow-y: visible; flex: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-area">
+      <h1>대수타일 수학 탐구 실습실</h1>
+      <p>타일을 끌어다 놓아 방정식, 곱셈공식, 인수분해를 시각적으로 탐구해보세요.</p>
+    </div>
+    <a href="https://rumi1542-collab.github.io/mathoperation/index.html" class="btn-home">
+      <span>🏠 홈</span>
+    </a>
+  </header>
+
+  <div class="main-container">
+    <aside class="sidebar">
+      <h2>학년별 탐구 모드</h2>
+      <div class="grade-selector">
+        <button class="btn-grade active" onclick="setMode(1, this)">중1 (방정식)</button>
+        <button class="btn-grade" onclick="setMode(2, this)">중2 (전개)</button>
+        <button class="btn-grade" onclick="setMode(3, this)">중3 (인수분해)</button>
+      </div>
+
+      <h2>보기 설정</h2>
+      <div class="checkbox-group">
+        <label class="checkbox-item">
+          <input type="checkbox" id="chkAxes" checked onchange="draw()">
+          <span>좌표축(x축, y축) 보기</span>
+        </label>
+
+        <label class="checkbox-item">
+          <input type="checkbox" id="chkSnap" checked>
+          <span>선분·좌표축 마그네틱(자석) 기능</span>
+        </label>
+      </div>
+
+      <h2>타일 생성 (클릭하여 추가)</h2>
+      <!-- 실제 기하창 타일과 1:1 합동 크기의 버튼 팔레트 -->
+      <div class="tile-palette-container">
+        <!-- x² 타일 (129px x 129px) -->
+        <div class="tile-pair-row">
+          <div class="tile-item">
+            <button class="btn-tile-shape tile-x2" onclick="addTile('x2', 1)" title="+x² 타일 추가">x²</button>
+          </div>
+          <div class="tile-item">
+            <button class="btn-tile-shape tile-nx2" onclick="addTile('x2', -1)" title="-x² 타일 추가">-x²</button>
+          </div>
+        </div>
+
+        <!-- x 타일 (129px x 38px) -->
+        <div class="tile-pair-row">
+          <div class="tile-item">
+            <button class="btn-tile-shape tile-x" onclick="addTile('x', 1)" title="+x 타일 추가">x</button>
+          </div>
+          <div class="tile-item">
+            <button class="btn-tile-shape tile-nx" onclick="addTile('x', -1)" title="-x 타일 추가">-x</button>
+          </div>
+        </div>
+
+        <!-- 1 타일 (38px x 38px) -->
+        <div class="tile-pair-row">
+          <div class="tile-item">
+            <button class="btn-tile-shape tile-1" onclick="addTile('1', 1)" title="+1 타일 추가">1</button>
+          </div>
+          <div class="tile-item">
+            <button class="btn-tile-shape tile-n1" onclick="addTile('1', -1)" title="-1 타일 추가">-1</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-box" id="guideText">
+        <strong>[조작 안내]</strong><br>
+        • <b>화면 드래그</b>: 빈 바탕을 누르고 드래그하여 화면을 이동합니다.<br>
+        • <b>마우스 휠</b>: 기하창 확대 / 축소 (Zoom)<br>
+        • <b>타일 클릭</b>: 타일을 90도 회전합니다.<br>
+        • <b>마그네틱</b>: 원점, $x$축, $y$축 및 같은 길이의 변끼리 자석처럼 달라붙습니다.<br>
+        • <b>영쌍 소멸</b>: 부호가 반대인 동일 타일이 포개지면 상쇄됩니다.
+      </div>
+    </aside>
+
+    <main class="viewport" id="viewport">
+      <button class="btn-clear" onclick="clearTiles()">↺ 전체 삭제 및 리셋</button>
+      <canvas id="stage"></canvas>
+    </main>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('stage');
+    const ctx = canvas.getContext('2d');
+    const viewport = document.getElementById('viewport');
+
+    let tiles = [];
+    let ghostBoxes = []; 
+    let selectedTile = null;
+    let dragOffset = { x: 0, y: 0 };
+    let isDragging = false;
+    let clickStartPos = { x: 0, y: 0 };
+
+    // 줌 & 팬(화면 이동) 상태 변수
+    let zoomScale = 1.0;
+    let panX = 0;
+    let panY = 0;
+    let isPanning = false;
+    let startPanX = 0;
+    let startPanY = 0;
+
+    // 1 정사각형 타일 한 변의 길이 (38px)
+    const UNIT = 38; 
+    // x의 길이를 3초과 4미만(3.4배)으로 설정: 1타일 3개를 이어붙여도 길이가 다름
+    const X_RATIO = 3.4;
+    const X_LEN = Math.round(UNIT * X_RATIO); // 약 129px
+
+    const TRASH_SIZE = 70;
+    const SNAP_DISTANCE = 14; 
+
+    function resizeCanvas() {
+      canvas.width = viewport.clientWidth;
+      canvas.height = viewport.clientHeight;
+      if (panX === 0 && panY === 0) {
+        panX = canvas.width / 2;
+        panY = canvas.height / 2;
+      }
+      draw();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function addTile(type, sign) {
+      let w = UNIT, h = UNIT;
+      if (type === 'x2') { w = X_LEN; h = X_LEN; }
+      else if (type === 'x') { w = X_LEN; h = UNIT; }
+
+      // 캔버스 중앙 근처의 월드 좌표계 계산
+      const worldCenterX = (canvas.width / 2 - panX) / zoomScale;
+      const worldCenterY = (canvas.height / 2 - panY) / zoomScale;
+
+      tiles.push({
+        id: Date.now() + Math.random(),
+        type, sign,
+        x: worldCenterX - w / 2 + (Math.random() * 40 - 20),
+        y: worldCenterY - h / 2 + (Math.random() * 40 - 20),
+        w, h
+      });
+      draw();
+    }
+
+    function clearTiles() {
+      tiles = [];
+      ghostBoxes = [];
+      zoomScale = 1.0;
+      panX = canvas.width / 2;
+      panY = canvas.height / 2;
+      draw();
+    }
+
+    function setMode(grade, btn) {
+      document.querySelectorAll('.btn-grade').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      // Zoom & Pan 변환 적용
+      ctx.translate(panX, panY);
+      ctx.scale(zoomScale, zoomScale);
+
+      const showAxes = document.getElementById('chkAxes').checked;
+
+      // 1. 좌표축 (실선 및 화살표, 축 이름)
+      if (showAxes) {
+        const leftWorld = -panX / zoomScale;
+        const rightWorld = (canvas.width - panX) / zoomScale;
+        const topWorld = -panY / zoomScale;
+        const bottomWorld = (canvas.height - panY) / zoomScale;
+
+        const arrowSize = 10 / zoomScale;
+
+        ctx.strokeStyle = '#334155';
+        ctx.fillStyle = '#334155';
+        ctx.lineWidth = 2 / zoomScale;
+
+        // --- x축 ---
+        ctx.beginPath();
+        ctx.moveTo(leftWorld, 0);
+        ctx.lineTo(rightWorld, 0);
+        ctx.stroke();
+
+        // x축 양의 방향 화살표
+        ctx.beginPath();
+        ctx.moveTo(rightWorld, 0);
+        ctx.lineTo(rightWorld - arrowSize * 1.5, -arrowSize * 0.6);
+        ctx.lineTo(rightWorld - arrowSize * 1.5, arrowSize * 0.6);
+        ctx.closePath();
+        ctx.fill();
+
+        // x축 이름
+        ctx.font = `italic bold ${18 / zoomScale}px 'Times New Roman', serif`;
+        ctx.fillText('x', rightWorld - arrowSize * 2, -arrowSize * 1.2);
+
+        // --- y축 ---
+        ctx.beginPath();
+        ctx.moveTo(0, bottomWorld);
+        ctx.lineTo(0, topWorld);
+        ctx.stroke();
+
+        // y축 양의 방향 화살표 (위쪽이 음수 방향)
+        ctx.beginPath();
+        ctx.moveTo(0, topWorld);
+        ctx.lineTo(-arrowSize * 0.6, topWorld + arrowSize * 1.5);
+        ctx.lineTo(arrowSize * 0.6, topWorld + arrowSize * 1.5);
+        ctx.closePath();
+        ctx.fill();
+
+        // y축 이름
+        ctx.font = `italic bold ${18 / zoomScale}px 'Times New Roman', serif`;
+        ctx.fillText('y', arrowSize * 1.2, topWorld + arrowSize * 2.2);
+
+        // 원점 O
+        ctx.font = `italic ${16 / zoomScale}px 'Times New Roman', serif`;
+        ctx.fillText('O', -16 / zoomScale, 20 / zoomScale);
+      }
+
+      // 2. 영쌍 소멸 잔상 박스
+      ghostBoxes.forEach(ghost => {
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2 / zoomScale;
+        ctx.setLineDash([6 / zoomScale, 6 / zoomScale]);
+        ctx.strokeRect(ghost.x, ghost.y, ghost.w, ghost.h);
+        ctx.setLineDash([]);
+      });
+
+      // 3. 타일 그리기
+      tiles.forEach(tile => {
+        ctx.save();
+        ctx.translate(tile.x, tile.y);
+
+        if (tile.type === 'x2') ctx.fillStyle = tile.sign > 0 ? '#3b82f6' : '#ef4444';
+        else if (tile.type === 'x') ctx.fillStyle = tile.sign > 0 ? '#60a5fa' : '#f87171';
+        else ctx.fillStyle = tile.sign > 0 ? '#f59e0b' : '#9ca3af';
+
+        ctx.fillRect(0, 0, tile.w, tile.h);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2 / zoomScale;
+        ctx.strokeRect(0, 0, tile.w, tile.h);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `bold ${16 / zoomScale}px Pretendard`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        let label = (tile.sign < 0 ? '-' : '') + (tile.type === 'x2' ? 'x²' : tile.type === 'x' ? 'x' : '1');
+        ctx.fillText(label, tile.w / 2, tile.h / 2);
+
+        ctx.restore();
+      });
+
+      ctx.restore();
+
+      // 4. 휴지통 (화면 상 고정 오버레이)
+      const trashX = canvas.width - TRASH_SIZE - 20;
+      const trashY = canvas.height - TRASH_SIZE - 20;
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(trashX, trashY, TRASH_SIZE, TRASH_SIZE, 12);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.font = '30px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🗑️', trashX + TRASH_SIZE / 2, trashY + TRASH_SIZE / 2);
+    }
+
+    // 마그네틱(자석) 착붙 로직 (원점, x축, y축 및 타일 간 결합)
+    function applyMagneticSnap(draggedTile) {
+      if (!document.getElementById('chkSnap').checked) return;
+
+      const SNAP = SNAP_DISTANCE / zoomScale;
+
+      // 1. 원점 및 x축, y축 마그네틱 스냅
+      // X축 (y = 0) 스냅
+      if (Math.abs(draggedTile.y) < SNAP) {
+        draggedTile.y = 0; 
+      } else if (Math.abs(draggedTile.y + draggedTile.h) < SNAP) {
+        draggedTile.y = -draggedTile.h; 
+      }
+
+      // Y축 (x = 0) 스냅
+      if (Math.abs(draggedTile.x) < SNAP) {
+        draggedTile.x = 0; 
+      } else if (Math.abs(draggedTile.x + draggedTile.w) < SNAP) {
+        draggedTile.x = -draggedTile.w; 
+      }
+
+      // 2. 다른 타일들과의 자석 결합
+      for (let i = 0; i < tiles.length; i++) {
+        const other = tiles[i];
+        if (other.id === draggedTile.id) continue;
+
+        const dxLeft = Math.abs(draggedTile.x - (other.x + other.w));
+        const dxRight = Math.abs((draggedTile.x + draggedTile.w) - other.x);
+
+        const dyTop = Math.abs(draggedTile.y - (other.y + other.h));
+        const dyBottom = Math.abs((draggedTile.y + draggedTile.h) - other.y);
+
+        const dyAlignTop = Math.abs(draggedTile.y - other.y);
+        const dyAlignBottom = Math.abs((draggedTile.y + draggedTile.h) - (other.y + other.h));
+
+        const dxAlignLeft = Math.abs(draggedTile.x - other.x);
+        const dxAlignRight = Math.abs((draggedTile.x + draggedTile.w) - (other.x + other.w));
+
+        // 좌우 맞닿기
+        if (dxLeft < SNAP) {
+          if (dyAlignTop < SNAP) {
+            draggedTile.x = other.x + other.w;
+            draggedTile.y = other.y;
+            return;
+          } else if (dyAlignBottom < SNAP) {
+            draggedTile.x = other.x + other.w;
+            draggedTile.y = other.y + other.h - draggedTile.h;
+            return;
+          }
+        } else if (dxRight < SNAP) {
+          if (dyAlignTop < SNAP) {
+            draggedTile.x = other.x - draggedTile.w;
+            draggedTile.y = other.y;
+            return;
+          } else if (dyAlignBottom < SNAP) {
+            draggedTile.x = other.x - draggedTile.w;
+            draggedTile.y = other.y + other.h - draggedTile.h;
+            return;
+          }
+        }
+
+        // 상하 맞닿기
+        if (dyTop < SNAP) {
+          if (dxAlignLeft < SNAP) {
+            draggedTile.y = other.y + other.h;
+            draggedTile.x = other.x;
+            return;
+          } else if (dxAlignRight < SNAP) {
+            draggedTile.y = other.y + other.h;
+            draggedTile.x = other.x + other.w - draggedTile.w;
+            return;
+          }
+        } else if (dyBottom < SNAP) {
+          if (dxAlignLeft < SNAP) {
+            draggedTile.y = other.y - draggedTile.h;
+            draggedTile.x = other.x;
+            return;
+          } else if (dxAlignRight < SNAP) {
+            draggedTile.y = other.y - draggedTile.h;
+            draggedTile.x = other.x + other.w - draggedTile.w;
+            return;
+          }
+        }
+      }
+    }
+
+    // 영쌍(Zero Pair) 상쇄 로직
+    function checkZeroPair(draggedTile) {
+      for (let i = tiles.length - 1; i >= 0; i--) {
+        const other = tiles[i];
+        if (other.id === draggedTile.id) continue;
+
+        if (other.type === draggedTile.type && other.sign === -draggedTile.sign) {
+          const isOverlap = !(draggedTile.x + draggedTile.w < other.x ||
+                              draggedTile.x > other.x + other.w ||
+                              draggedTile.y + draggedTile.h < other.y ||
+                              draggedTile.y > other.y + other.h);
+
+          if (isOverlap) {
+            ghostBoxes.push({
+              x: (draggedTile.x + other.x) / 2,
+              y: (draggedTile.y + other.y) / 2,
+              w: draggedTile.w,
+              h: draggedTile.h
+            });
+
+            setTimeout(() => {
+              ghostBoxes.shift();
+              draw();
+            }, 1200);
+
+            tiles = tiles.filter(t => t.id !== draggedTile.id && t.id !== other.id);
+            break;
+          }
+        }
+      }
+    }
+
+    // 휴지통 삭제 확인
+    function checkTrash(tile) {
+      const screenX = tile.x * zoomScale + panX;
+      const screenY = tile.y * zoomScale + panY;
+      const screenW = tile.w * zoomScale;
+      const screenH = tile.h * zoomScale;
+
+      const trashX = canvas.width - TRASH_SIZE - 20;
+      const trashY = canvas.height - TRASH_SIZE - 20;
+
+      const tileCenterX = screenX + screenW / 2;
+      const tileCenterY = screenY + screenH / 2;
+
+      if (tileCenterX >= trashX && tileCenterX <= trashX + TRASH_SIZE &&
+          tileCenterY >= trashY && tileCenterY <= trashY + TRASH_SIZE) {
+        tiles = tiles.filter(t => t.id !== tile.id);
+        return true;
+      }
+      return false;
+    }
+
+    function getCanvasWorldCoords(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      const sx = clientX - rect.left;
+      const sy = clientY - rect.top;
+      return {
+        x: (sx - panX) / zoomScale,
+        y: (sy - panY) / zoomScale,
+        screenX: sx,
+        screenY: sy
+      };
+    }
+
+    // 마우스 휠 확대/축소 (Zoom)
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+      const newScale = zoomScale * zoomFactor;
+
+      if (newScale >= 0.3 && newScale <= 4.0) {
+        panX = mouseX - (mouseX - panX) * zoomFactor;
+        panY = mouseY - (mouseY - panY) * zoomFactor;
+        zoomScale = newScale;
+        draw();
+      }
+    }, { passive: false });
+
+    function onStart(e) {
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const coords = getCanvasWorldCoords(clientX, clientY);
+
+      clickStartPos = { x: coords.x, y: coords.y };
+      isDragging = false;
+      selectedTile = null;
+
+      // 1. 타일 선택 여부 확인
+      for (let i = tiles.length - 1; i >= 0; i--) {
+        const t = tiles[i];
+        if (coords.x >= t.x && coords.x <= t.x + t.w && coords.y >= t.y && coords.y <= t.y + t.h) {
+          selectedTile = t;
+          dragOffset = { x: coords.x - t.x, y: coords.y - t.y };
+          tiles.splice(i, 1);
+          tiles.push(t);
+          draw();
+          return;
+        }
+      }
+
+      // 2. 빈 공간 클릭 시 기하창 화면 드래그(Pan) 활성화
+      isPanning = true;
+      startPanX = clientX - panX;
+      startPanY = clientY - panY;
+    }
+
+    function onMove(e) {
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      // 화면 드래그 이동 (Pan)
+      if (isPanning) {
+        panX = clientX - startPanX;
+        panY = clientY - startPanY;
+        draw();
+        return;
+      }
+
+      // 타일 드래그 이동
+      if (!selectedTile) return;
+      const coords = getCanvasWorldCoords(clientX, clientY);
+
+      if (Math.hypot(coords.x - clickStartPos.x, coords.y - clickStartPos.y) > 3) {
+        isDragging = true;
+      }
+
+      selectedTile.x = coords.x - dragOffset.x;
+      selectedTile.y = coords.y - dragOffset.y;
+
+      applyMagneticSnap(selectedTile);
+      draw();
+    }
+
+    function onEnd() {
+      if (isPanning) {
+        isPanning = false;
+      }
+
+      if (selectedTile) {
+        if (!isDragging) {
+          // 단순 클릭 시 90도 회전
+          let temp = selectedTile.w;
+          selectedTile.w = selectedTile.h;
+          selectedTile.h = temp;
+        } else {
+          // 휴지통 삭제 확인 후 영쌍 상쇄 확인
+          if (!checkTrash(selectedTile)) {
+            checkZeroPair(selectedTile);
+          }
+        }
+        draw();
+      }
+      selectedTile = null;
+      isDragging = false;
+    }
+
+    canvas.addEventListener('mousedown', onStart);
+    canvas.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+
+    canvas.addEventListener('touchstart', onStart, { passive: false });
+    canvas.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onEnd);
+
+    resizeCanvas();
+  </script>
+</body>
+</html>
