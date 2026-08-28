@@ -301,13 +301,18 @@
       <h2>보기 설정</h2>
       <div class="checkbox-group">
         <label class="checkbox-item">
-          <input type="checkbox" id="chkAxes" checked onchange="draw()">
+          <input type="checkbox" id="chkAxes" onchange="draw()">
           <span>좌표축(x축, y축) 보기</span>
         </label>
 
         <label class="checkbox-item">
-          <input type="checkbox" id="chkSnap" checked>
+          <input type="checkbox" id="chkSnap">
           <span>선분·좌표축 마그네틱(자석) 기능</span>
+        </label>
+
+        <label class="checkbox-item">
+          <input type="checkbox" id="chkZeroPair">
+          <span>겹쳐서 사라지게 하기 (영쌍 소멸)</span>
         </label>
       </div>
 
@@ -701,6 +706,8 @@
 
     // 영쌍(Zero Pair) 상쇄 로직
     function checkZeroPair(draggedTile) {
+      if (!document.getElementById('chkZeroPair').checked) return false;
+
       for (let i = tiles.length - 1; i >= 0; i--) {
         const other = tiles[i];
         if (other.id === draggedTile.id) continue;
@@ -725,10 +732,11 @@
             }, 1200);
 
             tiles = tiles.filter(t => t.id !== draggedTile.id && t.id !== other.id);
-            break;
+            return true;
           }
         }
       }
+      return false;
     }
 
     // 휴지통 삭제 확인
