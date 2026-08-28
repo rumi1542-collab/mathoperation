@@ -225,6 +225,43 @@
       z-index: 10;
     }
 
+    /* 다시 실행/되돌리기 버튼 그룹 (왼쪽 상단) */
+    .history-controls {
+      position: absolute;
+      top: calc(10px + 2mm);
+      left: calc(10px + 2mm);
+      display: flex;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .btn-history {
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 1px solid #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      backdrop-filter: blur(4px);
+      transition: all 0.2s ease;
+    }
+
+    .btn-history:hover:not(:disabled) {
+      background-color: #ffffff;
+      border-color: #94a3b8;
+    }
+
+    .btn-history:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
     @media (max-width: 768px) {
       body { overflow: auto; }
       header .title-area p { display: none; }
@@ -319,6 +356,11 @@
     </aside>
 
     <main class="viewport" id="viewport">
+      <!-- 히스토리(되돌리기/다시실행) 컨트롤 -->
+      <div class="history-controls">
+        <button class="btn-history" id="btnUndo" onclick="undo()" title="되돌리기 (Ctrl+Z)" disabled>↩ 되돌리기</button>
+        <button class="btn-history" id="btnRedo" onclick="redo()" title="다시 실행 (Ctrl+Y)" disabled>↪ 다시 실행</button>
+      </div>
       <button class="btn-clear" onclick="clearTiles()">↺ 전체 삭제 및 리셋</button>
       <canvas id="stage"></canvas>
     </main>
@@ -333,8 +375,63 @@
     let ghostBoxes = []; 
     let selectedTile = null;
     let dragOffset = { x: 0, y: 0 };
+    let tileStartPos = { x: 0, y: 0 };
     let isDragging = false;
     let clickStartPos = { x: 0, y: 0 };
+
+    // 히스토리 관리 (Undo/Redo)
+    let historyStack = [[]];
+    let historyIndex = 0;
+
+    function saveState() {
+      // 현재 인덱스 이후의 Redo 히스토리 제거
+      historyStack = historyStack.slice(0, historyIndex + 1);
+      // 현재 상태 스냅샷 저장
+      historyStack.push(JSON.parse(JSON.stringify(tiles)));
+      if (historyStack.length > 50) {
+        historyStack.shift();
+      } else {
+        historyIndex++;
+      }
+      updateHistoryButtons();
+    }
+
+    function undo() {
+      if (historyIndex > 0) {
+        historyIndex--;
+        tiles = JSON.parse(JSON.stringify(historyStack[historyIndex]));
+        ghostBoxes = [];
+        draw();
+        updateHistoryButtons();
+      }
+    }
+
+    function redo() {
+      if (historyIndex < historyStack.length - 1) {
+        historyIndex++;
+        tiles = JSON.parse(JSON.stringify(historyStack[historyIndex]));
+        ghostBoxes = [];
+        draw();
+        updateHistoryButtons();
+      }
+    }
+
+    function updateHistoryButtons() {
+      const btnUndo = document.getElementById('btnUndo');
+      const btnRedo = document.getElementById('btnRedo');
+      if (btnUndo) btnUndo.disabled = historyIndex <= 0;
+      if (btnRedo) btnRedo.disabled = historyIndex >= historyStack.length - 1;
+    }
+
+    // 키보드 단축키 지원 (Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z)
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        if (e.shiftKey) redo();
+        else undo();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        redo();
+      }
+    });
 
     // 줌 & 팬(화면 이동) 상태 변수
     let zoomScale = 1.0;
@@ -381,6 +478,7 @@
         w, h
       });
       draw();
+      saveState();
     }
 
     function clearTiles() {
@@ -390,6 +488,7 @@
       panX = canvas.width / 2;
       panY = canvas.height / 2;
       draw();
+      saveState();
     }
 
     function setMode(grade, btn) {
@@ -697,6 +796,7 @@
         const t = tiles[i];
         if (coords.x >= t.x && coords.x <= t.x + t.w && coords.y >= t.y && coords.y <= t.y + t.h) {
           selectedTile = t;
+          tileStartPos = { x: t.x, y: t.y };
           dragOffset = { x: coords.x - t.x, y: coords.y - t.y };
           tiles.splice(i, 1);
           tiles.push(t);
@@ -749,10 +849,20 @@
           let temp = selectedTile.w;
           selectedTile.w = selectedTile.h;
           selectedTile.h = temp;
+          saveState();
         } else {
           // 휴지통 삭제 확인 후 영쌍 상쇄 확인
-          if (!checkTrash(selectedTile)) {
-            checkZeroPair(selectedTile);
+          const removedByTrash = checkTrash(selectedTile);
+          let removedByZeroPair = false;
+          if (!removedByTrash) {
+            removedByZeroPair = checkZeroPair(selectedTile);
+          }
+
+          // 위치 이동 또는 삭제 발생 시 히스토리 저장
+          if (removedByTrash || removedByZeroPair ||
+              Math.abs(selectedTile.x - tileStartPos.x) > 1 ||
+              Math.abs(selectedTile.y - tileStartPos.y) > 1) {
+            saveState();
           }
         }
         draw();
