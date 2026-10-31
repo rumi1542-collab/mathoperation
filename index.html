@@ -1,116 +1,51 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MT RYU의 수학 실험실</title>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --accent: #3498db;
-            --bg: #f4f7f6;
-        }
-        body {
-            font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: calc(100vh - 40px - var(--labbar-h, 0px));
-            padding: 20px 0;
-        }
-        .dashboard {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-        }
-        h1 {
-            color: var(--primary);
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-        p {
-            color: #7f8c8d;
-            margin-bottom: 30px;
-        }
-        .menu-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .menu-item {
-            text-decoration: none;
-            padding: 20px;
-            background: #fff;
-            border: 2px solid #e0e6ed;
-            border-radius: 12px;
-            color: var(--primary);
-            font-weight: bold;
-            font-size: 18px;
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .menu-item:hover {
-            border-color: var(--accent);
-            background: #f0f7ff;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
-        }
-        .icon {
-            font-size: 24px;
-        }
-        .footer {
-            margin-top: 30px;
-            font-size: 13px;
-            color: #bdc3c7;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MT RYU의 수학 실험실</title>
+<meta name="theme-color" content="#7719AA">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2B0F3F;--muted:#5A4670;--line:#E6D8F2;--bg:#F8F2FC;--purple:#7719AA;--pink:#D81B7A;--tint:#F0DDFA}
+*{box-sizing:border-box}
+body{margin:0;min-height:calc(100vh - var(--labbar-h,0px));background-color:var(--bg);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;font-family:'Noto Sans KR','Malgun Gothic',system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center;padding:40px 16px 56px}
+.wrap{width:100%;max-width:640px;display:flex;flex-direction:column;gap:28px}
+.hero{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.ic{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:var(--tint);border:2px solid var(--ink)}
+h1{margin:0;font-size:clamp(28px,5vw,38px);line-height:1.25;font-weight:900}
+h1 em{font-style:normal;color:var(--purple)}
+.hero p{margin:0;font-size:17px;line-height:1.6;color:var(--muted)}
+.menu{display:flex;flex-direction:column;gap:14px}
+.item{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:14px 18px;background:#fff;border:2px solid var(--ink);border-radius:16px;box-shadow:4px 4px 0 var(--purple);color:var(--ink);text-decoration:none;font-size:18px;font-weight:700;transition:transform .15s,box-shadow .15s}
+.item:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--pink)}
+.item:focus-visible{outline:3px solid var(--pink);outline-offset:3px}
+.item .t{display:flex;align-items:center;gap:12px;min-width:0}
+.tag{flex:none;font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--tint);color:var(--purple)}
+.arrow{flex:none;font-size:22px;color:var(--purple)}
+.note{margin:0;text-align:center;font-size:15px;font-weight:500;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.item{transition:none}}
+</style>
 <script src="https://mtryu-lab.vercel.app/lab-bar.js" defer></script>
 </head>
 <body>
-
-<div class="dashboard">
-    <h1>📝 수학 실험실</h1>
+<main class="wrap">
+  <div class="hero">
+    <span class="ic"><svg width="30" height="30" viewBox="0 0 40 40" fill="none" stroke="#7719AA" stroke-width="3.5" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/><path d="M25 10h10"/><path d="M26 26l8 8M34 26l-8 8"/><path d="M25 30h10"/></svg></span>
+    <h1>MT RYU의 <em>수학 실험실</em></h1>
     <p>탐구하고 싶은 내용을 선택하세요!</p>
+  </div>
 
-    <div class="menu-list">
-        <a href="content/mathoperation.html" class="menu-item">
-            <span>🔢 기초 연산 무한 훈련</span>
-            <span class="icon">➔</span>
-        </a>
+  <nav class="menu" aria-label="수학 실험실 메뉴">
+    <a class="item" href="content/mathoperation.html"><span class="t"><span class="tag">연산</span>기초 연산 무한 훈련</span><span class="arrow">➔</span></a>
+    <a class="item" href="content/algebra-tile.html"><span class="t"><span class="tag">중1~3</span>문자와 식 대수타일</span><span class="arrow">➔</span></a>
+    <a class="item" href="content/mid2ndop.html"><span class="t"><span class="tag">중2</span>수와 식 무한 훈련</span><span class="arrow">➔</span></a>
+    <a class="item" href="content/similarity.html"><span class="t"><span class="tag">중2</span>도형의 닮음 탐구</span><span class="arrow">➔</span></a>
+    <a class="item" href="content/trigonometry.html"><span class="t"><span class="tag">중3</span>예각의 삼각비 탐구</span><span class="arrow">➔</span></a>
+  </nav>
 
-        <a href="content/algebra-tile.html" class="menu-item">
-            <span>🧱 중학교 문자와 식 대수타일</span>
-            <span class="icon">➔</span>
-        </a>
-
-        <a href="content/mid2ndop.html" class="menu-item">
-            <span>🔢 중2 수와 식 무한 훈련</span>
-            <span class="icon">➔</span>
-        </a>
-
-        <a href="content/similarity.html" class="menu-item">
-            <span>🔍 / 🔎 중2 도형의 닮음 탐구</span>
-            <span class="icon">➔</span>
-        </a>
-        
-        <a href="content/trigonometry.html" class="menu-item">
-            <span>📐 중3 예각의 삼각비 탐구</span>
-            <span class="icon">➔</span>
-        </a>
-    </div>
-
-    <div class="footer">
-        틀려도 괜찮아요! 직접 조작해 보며 배우는 여러분의 용기를 응원합니다.
-    </div>
-</div>
-
+  <p class="note">틀려도 괜찮아요! 직접 조작해 보며 배우는 여러분의 용기를 응원합니다.</p>
+</main>
 </body>
 </html>
