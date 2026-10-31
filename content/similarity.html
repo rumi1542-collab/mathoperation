@@ -13,7 +13,7 @@
       color: #333;
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      height: calc(100vh - var(--labbar-h, 0px));
       overflow: hidden;
       touch-action: none;
     }
@@ -56,7 +56,7 @@
     .main-container {
       display: flex;
       flex: 1;
-      height: calc(100vh - 60px);
+      height: calc(100vh - 60px - var(--labbar-h, 0px));
       padding: 16px;
       gap: 16px;
       min-height: 0;
@@ -174,7 +174,7 @@
       .main-container {
         flex-direction: column;
         height: auto;
-        min-height: calc(100vh - 60px);
+        min-height: calc(100vh - 60px - var(--labbar-h, 0px));
         padding: 10px;
         gap: 12px;
       }
@@ -182,6 +182,7 @@
       .sidebar { order: 2; width: 100%; max-height: none; overflow-y: visible; flex: none; }
     }
   </style>
+<script src="https://mtryu-lab.vercel.app/lab-bar.js" defer></script>
 </head>
 <body>
 
