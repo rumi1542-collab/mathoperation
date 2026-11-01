@@ -36,12 +36,7 @@
 
 <div class="container">
     <h1>🚀 중2 수와 식 무한 학습 엔진</h1>
-    <div id="start-screen">
-        <input type="text" id="user-name" placeholder="학생 이름을 입력하세요" style="width:100%; margin-bottom:15px; padding:15px;">
-        <button class="btn-main" style="width:100%" onclick="startGame()">학습 시작</button>
-    </div>
-
-    <div id="game-screen" class="hidden">
+    <div id="game-screen">
         <div class="info-panel"><span id="step-title"></span> | 학습자: <span id="display-name"></span></div>
         <div class="question-box" id="question"></div>
 
@@ -102,14 +97,15 @@
         return factors.join(" \\times ");
     }
 
-    function startGame() {
-        const name = document.getElementById('user-name').value.trim();
-        if(!name) return alert("이름을 입력하세요!");
-        document.getElementById('display-name').innerText = name;
-        document.getElementById('start-screen').classList.add('hidden');
-        document.getElementById('game-screen').classList.remove('hidden');
-        nextQuestion(false);
+    // 이름 입력 화면 없이 바로 시작해요. 학습자 이름은 상단 바의 내 정보(MtryuMe)에서 가져와요.
+    function showName() {
+        const me = window.MtryuMe && window.MtryuMe.get();
+        document.getElementById('display-name').innerText = me ? me.name : '';
     }
+    window.addEventListener('mtryu:me-changed', showName);
+    window.addEventListener('load', showName);
+    // 페이지(수식 라이브러리 포함)가 다 열리면 바로 첫 문제를 내요
+    window.addEventListener('load', function () { nextQuestion(false); });
 
     function getRepeatingDecimalParts(n, d) {
         let remainders = [], digits = [], rem = n % d;

@@ -41,13 +41,7 @@
 <div class="container">
     <h1>🔢 연산 무한 훈련 시스템</h1>
 
-    <div id="start-screen">
-        <p style="text-align:center;">학습자의 이름을 입력하고 시작하세요</p>
-        <input type="text" id="user-name" placeholder="이름 입력" style="width:100%">
-        <button class="main-btn" onclick="startGame()">학습 시작하기</button>
-    </div>
-
-    <div id="game-screen" class="hidden">
+    <div id="game-screen">
         <div class="info-panel">
             <strong>학습자:</strong> <span id="display-name"></span> | 
             <strong>단계:</strong> <span id="current-step">1</span> / 18
@@ -83,14 +77,13 @@
 <script>
     let step = 1, totalCount = 0, correctCount = 0, currentAnswer = null, attempts = 0;
 
-    function startGame() {
-        const name = document.getElementById('user-name').value.trim();
-        if (!name) return alert("이름을 입력하세요!");
-        document.getElementById('display-name').innerText = name;
-        document.getElementById('start-screen').classList.add('hidden');
-        document.getElementById('game-screen').classList.remove('hidden');
-        nextQuestion();
+    // 이름 입력 화면 없이 바로 시작해요. 학습자 이름은 상단 바의 내 정보(MtryuMe)에서 가져와요.
+    function showName() {
+        const me = window.MtryuMe && window.MtryuMe.get();
+        document.getElementById('display-name').innerText = me ? me.name : '';
     }
+    window.addEventListener('mtryu:me-changed', showName);
+    window.addEventListener('load', showName);
 
     const getGCD = (a, b) => b ? getGCD(b, a % b) : a;
     const getLCM = (a, b) => (a * b) / getGCD(a, b);
@@ -227,6 +220,9 @@
     }
 
     function handleKey(e) { if (e.key === 'Enter') checkAnswer(); }
+
+    // 페이지(수식 라이브러리 포함)가 다 열리면 바로 첫 문제를 내요
+    window.addEventListener('load', nextQuestion);
 </script>
 </body>
 </html>
