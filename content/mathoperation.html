@@ -94,12 +94,19 @@
 
         switch(s) {
             case 1: 
-                n1 = Math.floor(Math.random() * 80) + 11; n2 = Math.floor(Math.random() * 80) + 11;
-                while((n1%10 + n2%10) < 10) n2 = Math.floor(Math.random() * 80) + 11;
+                // 일의 자리끼리 더하면 받아올림이 생기도록 일의 자리부터 정해요 (반복문 없이)
+                { const u1 = Math.floor(Math.random() * 9) + 1;               // 1~9
+                  const u2 = Math.floor(Math.random() * (u1)) + (10 - u1);    // u1+u2 >= 10, u2 <= 9
+                  n1 = (Math.floor(Math.random() * 8) + 1) * 10 + u1;
+                  n2 = (Math.floor(Math.random() * 8) + 1) * 10 + u2; }
                 q = `${n1} + ${n2}`; a = {type:'s', val: (n1+n2).toString()}; break;
             case 2:
-                n1 = Math.floor(Math.random() * 70) + 25; n2 = Math.floor(Math.random() * (n1 - 10)) + 10;
-                while((n1%10 >= n2%10)) n1 = Math.floor(Math.random() * 70) + 25;
+                // 일의 자리끼리 빼지 못해 받아내림이 생기도록 정해요 (반복문 없이)
+                { const u2 = Math.floor(Math.random() * 9) + 1;               // 1~9
+                  const u1 = Math.floor(Math.random() * u2);                  // 0 ~ u2-1
+                  const t2 = Math.floor(Math.random() * 4) + 1;               // 1~4
+                  const t1 = t2 + 1 + Math.floor(Math.random() * (8 - t2));   // t2+1 ~ 8
+                  n1 = t1 * 10 + u1; n2 = t2 * 10 + u2; }
                 q = `${n1} - ${n2}`; a = {type:'s', val: (n1-n2).toString()}; break;
             case 3:
                 n1 = Math.floor(Math.random() * 80) + 10; n2 = Math.floor(Math.random() * 80) + 10;
