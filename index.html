@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MT RYU의 수학 실험실</title>
+<title>MT RYU의 대수 기하 실험실</title>
 <meta name="theme-color" content="#7719AA">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -13,6 +13,7 @@
 body{margin:0;min-height:calc(100vh - var(--labbar-h,0px));background-color:var(--bg);background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;font-family:'Noto Sans KR','Malgun Gothic',system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center;padding:40px 16px 56px}
 .wrap{width:100%;max-width:640px;display:flex;flex-direction:column;gap:28px}
 .hero{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.ics{display:flex;gap:8px}
 .ic{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:var(--tint);border:2px solid var(--ink)}
 h1{margin:0;font-size:clamp(28px,5vw,38px);line-height:1.25;font-weight:900}
 h1 em{font-style:normal;color:var(--purple)}
@@ -32,12 +33,12 @@ h1 em{font-style:normal;color:var(--purple)}
 <body>
 <main class="wrap">
   <div class="hero">
-    <span class="ic"><svg width="30" height="30" viewBox="0 0 40 40" fill="none" stroke="#7719AA" stroke-width="3.5" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/><path d="M25 10h10"/><path d="M26 26l8 8M34 26l-8 8"/><path d="M25 30h10"/></svg></span>
-    <h1>MT RYU의 <em>수학 실험실</em></h1>
+    <div class="ics"><span class="ic"><svg width="30" height="30" viewBox="0 0 40 40" fill="none" stroke="#7719AA" stroke-width="3.5" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/><path d="M25 10h10"/><path d="M26 26l8 8M34 26l-8 8"/><path d="M25 30h10"/></svg></span><span class="ic"><svg width="30" height="30" viewBox="0 0 40 40" fill="none" stroke="#7719AA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 33L6 7L34 33Z"/><path d="M6 25h8v8"/></svg></span></div>
+    <h1>MT RYU의 <em>대수 기하 실험실</em></h1>
     <p>탐구하고 싶은 내용을 선택하세요!</p>
   </div>
 
-  <nav class="menu" aria-label="수학 실험실 메뉴">
+  <nav class="menu" aria-label="대수 기하 실험실 메뉴">
     <a class="item" href="content/mathoperation.html"><span class="t"><span class="tag">연산</span>기초 연산 무한 훈련</span><span class="arrow">➔</span></a>
     <a class="item" href="content/algebra-tile.html"><span class="t"><span class="tag">중1~3</span>문자와 식 대수타일</span><span class="arrow">➔</span></a>
     <a class="item" href="content/mid2ndop.html"><span class="t"><span class="tag">중2</span>수와 식 무한 훈련</span><span class="arrow">➔</span></a>
